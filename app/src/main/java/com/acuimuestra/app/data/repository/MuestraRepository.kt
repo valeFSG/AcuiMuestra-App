@@ -4,6 +4,7 @@ import com.acuimuestra.app.data.local.MuestraDao
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.Muestra
 import kotlinx.coroutines.flow.Flow
+import com.acuimuestra.app.data.model.MuestraResumen
 
 data class FiltroMuestras(
     val centroId: Long? = null,
@@ -24,6 +25,9 @@ class MuestraRepository(private val dao: MuestraDao) {
 
     fun filtrar(filtro: FiltroMuestras = FiltroMuestras()): Flow<List<Muestra>> =
         dao.filtrar(filtro.centroId, filtro.lineaId, filtro.operadorId, filtro.estado, filtro.desde, filtro.hasta)
+
+    fun resumen(filtro: FiltroMuestras = FiltroMuestras()): Flow<List<MuestraResumen>> =
+        dao.resumen(filtro.centroId, filtro.lineaId, filtro.operadorId, filtro.estado, filtro.desde, filtro.hasta)
 
     suspend fun revisar(id: Long, estado: EstadoRevision, comentario: String?) =
         dao.actualizarEstado(id, estado, comentario?.trim()?.ifBlank { null })
