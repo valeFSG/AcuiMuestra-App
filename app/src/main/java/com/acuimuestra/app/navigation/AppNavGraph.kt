@@ -20,7 +20,10 @@ fun AppNavGraph() {
         composable(Ruta.Inicio.ruta) {
             InicioScreen(
                 onNuevaMuestra = { nav.navigate(Ruta.NuevaMuestra.ruta) },
-                onHistorial = { nav.navigate(Ruta.Historial.ruta) }
+                onHistorial = { nav.navigate(Ruta.Historial.ruta) },
+                onCerrarSesion = {
+                    nav.navigate(Ruta.Login.ruta) { popUpTo(nav.graph.id) { inclusive = true } }
+                }
             )
         }
         composable(Ruta.NuevaMuestra.ruta) { NuevaMuestraScreen(onSiguiente = { nav.navigate(Ruta.Conteo.ruta) }) }
