@@ -14,4 +14,5 @@ fun EstadoRevision.etiqueta(): String = when (this) {
     EstadoRevision.OBSERVADO -> "Observado"
     EstadoRevision.CORREGIDO -> "Corregido"
     EstadoRevision.VALIDADO -> "Validado"
+    EstadoRevision.DESCARTADO -> "Descartado"
 }

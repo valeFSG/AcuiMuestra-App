@@ -8,6 +8,7 @@ import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.Muestra
 import kotlinx.coroutines.flow.Flow
 import com.acuimuestra.app.data.model.MuestraResumen
+import com.acuimuestra.app.data.model.MuestraDetalle
 
 @Dao
 interface MuestraDao {
@@ -71,4 +72,24 @@ interface MuestraDao {
         desde: Long? = null,
         hasta: Long? = null
     ): Flow<List<MuestraResumen>>
+
+    @Query(
+        """
+        SELECT m.id, m.fechaHora, m.tramoCm, m.conteo, m.observaciones, m.fotoUri,
+               m.calibrePromedioMm, m.calibreMinMm, m.calibreMaxMm, m.pesoGramos,
+               m.estado, m.comentarioSupervisor,
+               c.nombre AS centroNombre, t.nombre AS trenNombre,
+               l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
+        FROM muestras m
+        JOIN centros c ON c.id = m.centroId
+        JOIN trenes t ON t.id = m.trenId
+        JOIN lineas l ON l.id = m.lineaId
+        JOIN usuarios u ON u.id = m.operadorId
+        WHERE m.id = :id
+        """
+    )
+    fun observarDetalle(id: Long): Flow<MuestraDetalle?>
+
+    @Query("UPDATE muestras SET conteo = :conteo, tramoCm = :tramoCm, observaciones = :observaciones, estado = :estado WHERE id = :id")
+    suspend fun corregir(id: Long, conteo: Int, tramoCm: Int, observaciones: String, estado: EstadoRevision)
 }

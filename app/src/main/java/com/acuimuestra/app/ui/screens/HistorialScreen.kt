@@ -129,6 +129,7 @@ fun EtiquetaEstado(estado: EstadoRevision) {
         EstadoRevision.OBSERVADO -> colores.errorContainer to colores.onErrorContainer
         EstadoRevision.CORREGIDO -> colores.tertiaryContainer to colores.onTertiaryContainer
         EstadoRevision.VALIDADO -> colores.primaryContainer to colores.onPrimaryContainer
+        EstadoRevision.DESCARTADO -> colores.surfaceVariant to colores.onSurfaceVariant
     }
     Surface(color = fondo, contentColor = texto, shape = MaterialTheme.shapes.small) {
         Text(
