@@ -2,6 +2,8 @@ package com.acuimuestra.app.navigation
 
 sealed class Ruta(val ruta: String) {
     data object Login : Ruta("login")
+
+    data object Registro : Ruta("registro")
     data object Inicio : Ruta("inicio")
     data object NuevaMuestra : Ruta("nueva_muestra")
     data object Conteo : Ruta("conteo")
