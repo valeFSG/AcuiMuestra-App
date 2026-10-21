@@ -11,18 +11,13 @@ import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.FiltroMuestras
 import com.acuimuestra.app.data.repository.MuestraRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 
 data class HistorialUiState(
     val cargando: Boolean = true,
     val centros: List<Centro> = emptyList(),
     val filtro: FiltroMuestras = FiltroMuestras(),
+    val busqueda: String = "",
     val muestras: List<MuestraResumen> = emptyList()
 )
 
@@ -33,18 +28,39 @@ class HistorialViewModel(
 ) : ViewModel() {
 
     private val filtro = MutableStateFlow(FiltroMuestras())
+    private val busqueda = MutableStateFlow("")
 
     val estado: StateFlow<HistorialUiState> = combine(
         catalogoRepository.centros(),
         filtro,
-        filtro.flatMapLatest { muestraRepository.resumen(it) }
-    ) { centros, filtroActual, muestras ->
-        HistorialUiState(cargando = false, centros = centros, filtro = filtroActual, muestras = muestras)
+        filtro.flatMapLatest { muestraRepository.resumen(it) },
+        busqueda
+    ) { centros, filtroActual, muestras, texto ->
+        HistorialUiState(
+            cargando = false,
+            centros = centros,
+            filtro = filtroActual,
+            busqueda = texto,
+            muestras = buscar(muestras, texto)
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
 
     fun filtrarCentro(centroId: Long?) = filtro.update { it.copy(centroId = centroId) }
 
     fun filtrarEstado(estado: EstadoRevision?) = filtro.update { it.copy(estado = estado) }
+
+    fun onBusquedaChange(texto: String) {
+        busqueda.value = texto
+    }
+
+    private fun buscar(muestras: List<MuestraResumen>, texto: String): List<MuestraResumen> {
+        val t = texto.trim()
+        if (t.isEmpty()) return muestras
+        return muestras.filter { m ->
+            listOf("#${m.id}", m.centroNombre, m.trenNombre, m.lineaNombre, m.operadorNombre, m.conteo.toString())
+                .any { it.contains(t, ignoreCase = true) }
+        }
+    }
 
     companion object {
         val Factory = viewModelFactory {

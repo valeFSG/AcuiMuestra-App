@@ -7,33 +7,38 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val EsquemaClaro = lightColorScheme(
-    primary = AzulPrincipal,
-    onPrimary = Blanco,
-    secondary = VerdeSecundario,
-    onSecondary = Blanco,
-    tertiary = AmbarAlerta,
-    onTertiary = TextoOscuro,
-    background = FondoClaro,
-    onBackground = TextoOscuro,
-    surface = Blanco,
-    onSurface = TextoOscuro,
-    error = RojoError,
-    onError = Blanco
+    primary = AzulPrincipal, onPrimary = Blanco,
+    primaryContainer = AzulContenedor, onPrimaryContainer = AzulProfundo,
+    secondary = VerdeSecundario, onSecondary = Blanco,
+    secondaryContainer = VerdeContenedor, onSecondaryContainer = VerdeOscuro,
+    tertiary = AmbarAlerta, onTertiary = TextoOscuro,
+    tertiaryContainer = AmbarContenedor, onTertiaryContainer = AmbarOscuro,
+    error = RojoError, onError = Blanco,
+    errorContainer = RojoContenedor, onErrorContainer = RojoOscuro,
+    background = FondoClaro, onBackground = TextoOscuro,
+    surface = FondoClaro, onSurface = TextoOscuro,
+    surfaceVariant = SuperficieVariante, onSurfaceVariant = TextoSecundario,
+    surfaceContainerLowest = Blanco, surfaceContainerLow = Blanco,
+    surfaceContainer = Blanco, surfaceContainerHigh = Blanco, surfaceContainerHighest = Blanco,
+    outline = Borde, outlineVariant = BordeSuave
 )
 
 private val EsquemaOscuro = darkColorScheme(
-    primary = AzulPrincipal,
-    onPrimary = Blanco,
-    secondary = VerdeSecundario,
-    onSecondary = Blanco,
-    tertiary = AmbarAlerta,
-    onTertiary = TextoOscuro,
-    background = FondoOscuro,
-    onBackground = TextoClaro,
-    surface = SuperficieOscura,
-    onSurface = TextoClaro,
-    error = RojoError,
-    onError = Blanco
+    primary = Color4FB3F0, onPrimary = AzulProfundo,
+    primaryContainer = AzulProfundo, onPrimaryContainer = AzulContenedor,
+    secondary = Color4DD0C0, onSecondary = VerdeOscuro,
+    secondaryContainer = VerdeOscuro, onSecondaryContainer = VerdeContenedor,
+    tertiary = AmbarAlerta, onTertiary = TextoOscuro,
+    tertiaryContainer = AmbarOscuro, onTertiaryContainer = AmbarContenedor,
+    error = ColorFF8A80, onError = RojoOscuro,
+    errorContainer = RojoOscuro, onErrorContainer = RojoContenedor,
+    background = FondoOscuro, onBackground = TextoClaro,
+    surface = FondoOscuro, onSurface = TextoClaro,
+    surfaceVariant = SuperficieOscuraAlta, onSurfaceVariant = TextoClaroSecundario,
+    surfaceContainerLowest = SuperficieOscura, surfaceContainerLow = SuperficieOscura,
+    surfaceContainer = SuperficieOscura, surfaceContainerHigh = SuperficieOscuraAlta,
+    surfaceContainerHighest = SuperficieOscuraAlta,
+    outline = TextoClaroSecundario, outlineVariant = SuperficieOscuraAlta
 )
 
 @Composable
