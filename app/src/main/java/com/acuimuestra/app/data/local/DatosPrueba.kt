@@ -30,7 +30,12 @@ object DatosPrueba {
 
             val ahora = System.currentTimeMillis()
             val unDia = 86_400_000L
-            EstadoRevision.entries.forEachIndexed { i, estado ->
+            listOf(
+                EstadoRevision.PENDIENTE,
+                EstadoRevision.OBSERVADO,
+                EstadoRevision.CORREGIDO,
+                EstadoRevision.VALIDADO
+            ).forEachIndexed { i, estado ->
                 val (centroId, trenId, lineaId) = ubicaciones[i * 3]
                 db.muestraDao().insertar(
                     Muestra(
@@ -42,7 +47,9 @@ object DatosPrueba {
                         tramoCm = 20,
                         conteo = 150 + i * 12,
                         observaciones = "Muestra de prueba ${i + 1}",
-                        estado = estado
+                        estado = estado,
+                        comentarioSupervisor = if(estado == EstadoRevision.OBSERVADO) "Conteo dudoso, repetir el tramo" else null
+
                     )
                 )
             }
