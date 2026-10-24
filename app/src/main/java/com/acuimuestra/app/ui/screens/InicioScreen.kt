@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.acuimuestra.app.R
 import com.acuimuestra.app.data.model.Rol
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
@@ -108,7 +109,8 @@ fun InicioScreen(
                     descripcion = "Valida, observa o descarta los registros",
                     simbolo = "✓",
                     colores = listOf(VerdeOscuro, VerdeSecundario),
-                    onClick = onHistorial
+                    onClick = onHistorial,
+                    imagen = R.drawable.inicio_revisar
                 )
             } else {
                 CardAccion(
@@ -116,14 +118,16 @@ fun InicioScreen(
                     descripcion = "Registra una muestra de chorito en terreno",
                     simbolo = "+",
                     colores = listOf(AzulProfundo, AzulPrincipal),
-                    onClick = onNuevaMuestra
+                    onClick = onNuevaMuestra,
+                    imagen = R.drawable.inicio_nueva_muestra
                 )
                 CardAccion(
                     titulo = "Historial",
                     descripcion = "Consulta y filtra las muestras registradas",
                     simbolo = "≡",
                     colores = listOf(VerdeOscuro, VerdeSecundario),
-                    onClick = onHistorial
+                    onClick = onHistorial,
+                    imagen = R.drawable.inicio_historial
                 )
             }
         }
