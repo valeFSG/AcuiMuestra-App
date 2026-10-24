@@ -28,10 +28,14 @@ import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.ui.theme.colores
 import com.acuimuestra.app.viewmodel.HistorialViewModel
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 
 @Composable
 fun HistorialScreen(
     onVerDetalle: (Long) -> Unit,
+    onVolver: () -> Unit,
     viewModel: HistorialViewModel = viewModel(factory = HistorialViewModel.Factory)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -45,6 +49,13 @@ fun HistorialScreen(
                 .statusBarsPadding()
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 20.dp)
         ) {
+            TextButton(
+                onClick = onVolver,
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier.offset(x = (-4).dp)
+            ) {
+                Text("‹ Inicio", color = Color.White, fontWeight = FontWeight.SemiBold)
+            }
             Text("Historial de muestras", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
             Text("${estado.muestras.size} resultado(s)", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
             Spacer(Modifier.height(16.dp))
@@ -106,10 +117,17 @@ private fun <T> FilaFiltros(
     onSeleccionar: (T?) -> Unit
 ) {
     val fondo = MaterialTheme.colorScheme.background
-    Box {
+    val estadoLista = rememberLazyListState()
+    val hayMasDerecha by remember { derivedStateOf { estadoLista.canScrollForward } }
+    val hayMasIzquierda by remember { derivedStateOf { estadoLista.canScrollBackward } }
+
+    Box(Modifier.fillMaxWidth().height(44.dp)) {
         LazyRow(
-            contentPadding = PaddingValues(start = 24.dp, end = 48.dp, top = 2.dp, bottom = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            state = estadoLista,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxSize()
         ) {
             items(opciones) { (valor, texto) ->
                 FilterChip(
@@ -120,12 +138,36 @@ private fun <T> FilaFiltros(
                 )
             }
         }
-        Box(
-            Modifier
-                .align(Alignment.CenterEnd)
-                .width(48.dp)
-                .height(40.dp)
-                .background(Brush.horizontalGradient(listOf(fondo.copy(alpha = 0f), fondo)))
+
+        if (hayMasIzquierda) {
+            IndicadorMas(
+                simbolo = "‹",
+                degradado = Brush.horizontalGradient(listOf(fondo, fondo.copy(alpha = 0f))),
+                modifier = Modifier.align(Alignment.CenterStart)
+            )
+        }
+        if (hayMasDerecha) {
+            IndicadorMas(
+                simbolo = "›",
+                degradado = Brush.horizontalGradient(listOf(fondo.copy(alpha = 0f), fondo, fondo)),
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+        }
+    }
+}
+
+@Composable
+private fun IndicadorMas(simbolo: String, degradado: Brush, modifier: Modifier) {
+    Box(
+        modifier.width(64.dp).fillMaxHeight().background(degradado),
+        contentAlignment = if (simbolo == "›") Alignment.CenterEnd else Alignment.CenterStart
+    ) {
+        Text(
+            simbolo,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
     }
 }
