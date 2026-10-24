@@ -1,26 +1,35 @@
 package com.acuimuestra.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraDetalle
 import com.acuimuestra.app.ui.comoFechaHora
+import com.acuimuestra.app.ui.components.FotoMuestra
+import com.acuimuestra.app.ui.theme.AzulPrincipal
+import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.viewmodel.DetalleUiState
 import com.acuimuestra.app.viewmodel.DetalleViewModel
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import com.acuimuestra.app.viewmodel.FormularioCorreccion
 
 @Composable
@@ -33,61 +42,176 @@ fun DetalleScreen(
     val muestra = estado.muestra
 
     Column(
-        modifier = Modifier
+        Modifier
             .fillMaxSize()
-            .safeDrawingPadding()
+            .background(MaterialTheme.colorScheme.background)
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
-
         when {
-            estado.cargando -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-            muestra == null -> Text("No se encontró la muestra", style = MaterialTheme.typography.bodyLarge)
+            estado.cargando -> Box(
+                Modifier.fillMaxWidth().statusBarsPadding().padding(48.dp),
+                contentAlignment = Alignment.Center
+            ) { CircularProgressIndicator() }
+
+            muestra == null -> Column(Modifier.statusBarsPadding().padding(24.dp)) {
+                TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
+                Text("No se encontró la muestra", style = MaterialTheme.typography.bodyLarge)
+            }
+
             else -> {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Encabezado(muestra, onVolver)
+                Column(
+                    Modifier.padding(20.dp).navigationBarsPadding(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("Muestra #${muestra.id}", style = MaterialTheme.typography.headlineSmall)
-                    EtiquetaEstado(muestra.estado)
+                    Metricas(muestra)
+
+                    Seccion("Ubicación") {
+                        Dato("Centro de cultivo", muestra.centroNombre)
+                        Dato("Tren · Línea", "${muestra.trenNombre} · ${muestra.lineaNombre}")
+                    }
+                    Seccion("Registro") {
+                        Dato("Fecha y hora", muestra.fechaHora.comoFechaHora())
+                        Dato("Operador", muestra.operadorNombre)
+                        Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
+                    }
+                    Seccion("Observaciones") {
+                        Text(
+                            muestra.observaciones.ifBlank { "Sin observaciones" },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (muestra.observaciones.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    muestra.comentarioSupervisor?.let { comentario ->
+                        Aviso(
+                            titulo = "Comentario del supervisor",
+                            texto = comentario,
+                            esAlerta = muestra.estado == EstadoRevision.OBSERVADO
+                        )
+                    }
+                    estado.mensaje?.let { Aviso(titulo = "Listo", texto = it, esAlerta = false) }
+
+                    Acciones(estado, viewModel)
                 }
-
-                DatosMuestra(muestra)
-
-                muestra.comentarioSupervisor?.let { comentario ->
-                    Aviso(
-                        titulo = "Comentario del supervisor",
-                        texto = comentario,
-                        esAlerta = muestra.estado == EstadoRevision.OBSERVADO
-                    )
-                }
-
-                estado.mensaje?.let { Aviso(titulo = "Listo", texto = it, esAlerta = false) }
-
-                Acciones(estado, viewModel)
             }
         }
     }
 }
 
 @Composable
-private fun DatosMuestra(muestra: MuestraDetalle) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Dato("Centro", muestra.centroNombre)
-            Dato("Tren · Línea", "${muestra.trenNombre} · ${muestra.lineaNombre}")
-            Dato("Fecha y hora", muestra.fechaHora.comoFechaHora())
-            Dato("Operador", muestra.operadorNombre)
-            Dato("Tramo muestreado", "${muestra.tramoCm} cm")
-            Dato("Conteo", "${muestra.conteo} individuos")
-            muestra.calibrePromedioMm?.let { Dato("Calibre promedio", "$it mm") }
-            muestra.pesoGramos?.let { Dato("Peso", "$it g") }
-            Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
-            Dato("Observaciones", muestra.observaciones.ifBlank { "Sin observaciones" })
+private fun Encabezado(muestra: MuestraDetalle, onVolver: () -> Unit) {
+    val conFoto = muestra.fotoUri != null
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(if (conFoto) 300.dp else 200.dp)
+            .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+            .background(Brush.verticalGradient(listOf(AzulProfundo, AzulPrincipal)))
+    ) {
+        muestra.fotoUri?.let { uri ->
+            FotoMuestra(fotoUri = uri, modifier = Modifier.matchParentSize())
+        }
+        Box(
+            Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent, Color.Black.copy(alpha = 0.7f))
+                    )
+                )
+        )
+        TextButton(
+            onClick = onVolver,
+            modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp)
+        ) {
+            Text("‹ Volver", color = Color.White, fontWeight = FontWeight.SemiBold)
+        }
+        Column(Modifier.align(Alignment.BottomStart).padding(20.dp)) {
+            EtiquetaEstado(muestra.estado)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Muestra #${muestra.id}",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                "${muestra.centroNombre} · ${muestra.lineaNombre}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.85f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun Metricas(muestra: MuestraDetalle) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Metrica("Conteo", "${muestra.conteo}", "individuos", destacada = true, modifier = Modifier.weight(1f))
+            Metrica("Tramo", "${muestra.tramoCm}", "cm", modifier = Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Metrica("Calibre", muestra.calibrePromedioMm?.toString() ?: "—", "mm", modifier = Modifier.weight(1f))
+            Metrica("Peso", muestra.pesoGramos?.toString() ?: "—", "g", modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun Metrica(
+    etiqueta: String,
+    valor: String,
+    unidad: String,
+    modifier: Modifier = Modifier,
+    destacada: Boolean = false
+) {
+    val colores = MaterialTheme.colorScheme
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (destacada) colores.primary else colores.surfaceContainerLowest,
+            contentColor = if (destacada) colores.onPrimary else colores.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = LocalContentColor.current.copy(alpha = 0.75f))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(valor, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                if (valor != "—") {
+                    Text(
+                        " $unidad",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalContentColor.current.copy(alpha = 0.75f),
+                        modifier = Modifier.padding(bottom = 3.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Seccion(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                titulo.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            contenido()
         }
     }
 }

@@ -121,6 +121,14 @@ class RegistroViewModel(
 
     fun validarDatos(): Boolean = validarCampos(CampoRegistro.entries)
 
+    fun validarUbicacion(): Boolean = validarCampos(
+        listOf(CampoRegistro.CENTRO, CampoRegistro.TREN, CampoRegistro.LINEA, CampoRegistro.FECHA, CampoRegistro.TRAMO)
+    )
+
+    fun validarConteo(): Boolean = validarCampos(
+        listOf(CampoRegistro.CONTEO, CampoRegistro.OBSERVACIONES, CampoRegistro.CALIBRE, CampoRegistro.PESO)
+    )
+
     fun guardar() {
         if (!validarDatos()) return
         val f = formulario.value
