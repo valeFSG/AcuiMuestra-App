@@ -10,8 +10,8 @@ object DatosPrueba {
         db.withTransaction {
             db.usuarioDao().insertarTodos(
                 listOf(
-                    Usuario(id = 1, usuario = "operador", clave = "1234", nombreVisible = "Operador Demo", rol = Rol.OPERADOR),
-                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Supervisor Demo", rol = Rol.SUPERVISOR)
+                    Usuario(id = 1, usuario = "operador", clave = "1234", nombreVisible = "Operador", rol = Rol.OPERADOR),
+                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Supervisor", rol = Rol.SUPERVISOR)
                 )
             )
 
