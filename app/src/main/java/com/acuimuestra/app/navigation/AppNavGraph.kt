@@ -66,7 +66,10 @@ fun AppNavGraph() {
             }
         }
         composable(Ruta.Historial.ruta) {
-            HistorialScreen(onVerDetalle = { id -> nav.navigate(Ruta.Detalle.crear(id)) })
+            HistorialScreen(
+                onVerDetalle = { id -> nav.navigate(Ruta.Detalle.crear(id)) },
+                onVolver = { nav.popBackStack() }
+            )
         }
         composable(
             route = Ruta.Detalle.ruta,
