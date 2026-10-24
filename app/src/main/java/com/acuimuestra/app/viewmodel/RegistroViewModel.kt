@@ -45,6 +45,10 @@ object ReglasRegistro {
     const val MAX_OBSERVACIONES = 200
     const val MAX_TRAMO_CM = 500
     const val MAX_CONTEO = 100_000
+
+    const val MAX_PESO_G = 10_000.0
+
+    const val MAX_CALIBRE_MM = 150.0
     const val FOTO_OBLIGATORIA = false
 
     fun validar(campo: CampoRegistro, f: FormularioRegistro): String? = when (campo) {
@@ -55,8 +59,8 @@ object ReglasRegistro {
         CampoRegistro.TRAMO -> entero(f.tramoCm, "El tramo", MAX_TRAMO_CM)
         CampoRegistro.CONTEO -> entero(f.conteo, "El conteo", MAX_CONTEO)
         CampoRegistro.OBSERVACIONES -> if (f.observaciones.length > MAX_OBSERVACIONES) "Máximo $MAX_OBSERVACIONES caracteres" else null
-        CampoRegistro.CALIBRE -> decimalOpcional(f.calibrePromedioMm)
-        CampoRegistro.PESO -> decimalOpcional(f.pesoGramos)
+        CampoRegistro.CALIBRE -> decimalOpcional(f.calibrePromedioMm, MAX_CALIBRE_MM, "mm")
+        CampoRegistro.PESO -> decimalOpcional(f.pesoGramos, MAX_PESO_G, "g")
     }
 
     private fun entero(valor: String, campo: String, maximo: Int): String? {
@@ -69,10 +73,14 @@ object ReglasRegistro {
         }
     }
 
-    private fun decimalOpcional(valor: String): String? {
+    private fun decimalOpcional(valor: String, maximo: Double, unidad: String): String? {
         if (valor.isBlank()) return null
         val numero = valor.trim().replace(',', '.').toDoubleOrNull()
-        return if (numero == null || numero <= 0) "Ingresa un número válido mayor a 0" else null
+        return when {
+            numero == null || numero <= 0 -> "Ingresa un número válido mayor a 0"
+            numero > maximo -> "Debe ser menor o igual a ${maximo.toInt()} $unidad"
+            else -> null
+        }
     }
 
     fun aDecimal(valor: String): Double? = valor.trim().replace(',', '.').toDoubleOrNull()
