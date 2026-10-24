@@ -18,7 +18,8 @@ data class HistorialUiState(
     val centros: List<Centro> = emptyList(),
     val filtro: FiltroMuestras = FiltroMuestras(),
     val busqueda: String = "",
-    val muestras: List<MuestraResumen> = emptyList()
+    val muestras: List<MuestraResumen> = emptyList(),
+    val todas: List<MuestraResumen> = emptyList()
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -34,17 +35,19 @@ class HistorialViewModel(
         catalogoRepository.centros(),
         filtro,
         filtro.flatMapLatest { muestraRepository.resumen(it) },
-        busqueda
-    ) { centros, filtroActual, muestras, texto ->
+        busqueda,
+        muestraRepository.resumen()
+    ) { centros, filtroActual, muestras, texto, todas ->
         HistorialUiState(
             cargando = false,
             centros = centros,
             filtro = filtroActual,
             busqueda = texto,
-            muestras = buscar(muestras, texto)
+            muestras = buscar(muestras, texto),
+            todas = todas
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
 
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
     fun filtrarCentro(centroId: Long?) = filtro.update { it.copy(centroId = centroId) }
 
     fun filtrarEstado(estado: EstadoRevision?) = filtro.update { it.copy(estado = estado) }

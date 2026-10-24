@@ -31,6 +31,9 @@ import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.viewmodel.DetalleUiState
 import com.acuimuestra.app.viewmodel.DetalleViewModel
 import com.acuimuestra.app.viewmodel.FormularioCorreccion
+import androidx.compose.ui.platform.LocalContext
+import com.acuimuestra.app.ui.compartirTexto
+import com.acuimuestra.app.ui.resumenTexto
 
 @Composable
 fun DetalleScreen(
@@ -83,6 +86,14 @@ fun DetalleScreen(
                             color = if (muestra.observaciones.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
                             else MaterialTheme.colorScheme.onSurface
                         )
+                    }
+                    val context = LocalContext.current
+                    OutlinedButton(
+                        onClick = { compartirTexto(context, muestra.resumenTexto()) },
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) {
+                        Text("Compartir resumen")
                     }
 
                     muestra.comentarioSupervisor?.let { comentario ->
