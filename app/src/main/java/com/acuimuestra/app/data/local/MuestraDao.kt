@@ -90,6 +90,21 @@ interface MuestraDao {
     )
     fun observarDetalle(id: Long): Flow<MuestraDetalle?>
 
-    @Query("UPDATE muestras SET conteo = :conteo, tramoCm = :tramoCm, observaciones = :observaciones, estado = :estado WHERE id = :id")
-    suspend fun corregir(id: Long, conteo: Int, tramoCm: Int, observaciones: String, estado: EstadoRevision)
+    @Query(
+        """
+        UPDATE muestras SET conteo = :conteo, tramoCm = :tramoCm, observaciones = :observaciones,
+            calibrePromedioMm = :calibre, pesoGramos = :peso, fotoUri = :fotoUri, estado = :estado
+        WHERE id = :id
+        """
+    )
+    suspend fun corregir(
+        id: Long,
+        conteo: Int,
+        tramoCm: Int,
+        observaciones: String,
+        calibre: Double?,
+        peso: Double?,
+        fotoUri: String?,
+        estado: EstadoRevision
+    )
 }

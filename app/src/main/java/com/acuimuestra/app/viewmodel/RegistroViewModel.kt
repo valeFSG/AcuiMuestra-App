@@ -73,7 +73,7 @@ object ReglasRegistro {
         }
     }
 
-    private fun decimalOpcional(valor: String, maximo: Double, unidad: String): String? {
+    fun decimalOpcional(valor: String, maximo: Double, unidad: String): String? {
         if (valor.isBlank()) return null
         val numero = valor.trim().replace(',', '.').toDoubleOrNull()
         return when {

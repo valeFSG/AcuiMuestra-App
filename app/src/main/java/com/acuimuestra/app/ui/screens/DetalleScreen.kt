@@ -34,6 +34,7 @@ import com.acuimuestra.app.viewmodel.FormularioCorreccion
 import androidx.compose.ui.platform.LocalContext
 import com.acuimuestra.app.ui.compartirTexto
 import com.acuimuestra.app.ui.resumenTexto
+import com.acuimuestra.app.ui.components.SelectorFoto
 
 @Composable
 fun DetalleScreen(
@@ -337,29 +338,16 @@ private fun TextoCierre(texto: String) {
 @Composable
 private fun FormularioCorreccionUi(correccion: FormularioCorreccion, viewModel: DetalleViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Corregir datos", style = MaterialTheme.typography.titleMedium)
+        Text("Corregir datos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
-        OutlinedTextField(
-            value = correccion.conteo,
-            onValueChange = viewModel::onConteoChange,
-            label = { Text("Conteo de individuos *") },
-            singleLine = true,
-            isError = correccion.errorConteo != null,
-            supportingText = correccion.errorConteo?.let { mensaje -> { Text(mensaje) } },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = correccion.tramo,
-            onValueChange = viewModel::onTramoChange,
-            label = { Text("Tramo muestreado (cm) *") },
-            singleLine = true,
-            isError = correccion.errorTramo != null,
-            supportingText = correccion.errorTramo?.let { mensaje -> { Text(mensaje) } },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            CampoCorreccion(correccion.conteo, viewModel::onConteoChange, "Conteo *", correccion.errorConteo, false, Modifier.weight(1f))
+            CampoCorreccion(correccion.tramo, viewModel::onTramoChange, "Tramo (cm) *", correccion.errorTramo, false, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            CampoCorreccion(correccion.calibre, viewModel::onCalibreChange, "Calibre (mm)", correccion.errorCalibre, true, Modifier.weight(1f))
+            CampoCorreccion(correccion.peso, viewModel::onPesoChange, "Peso (g)", correccion.errorPeso, true, Modifier.weight(1f))
+        }
 
         OutlinedTextField(
             value = correccion.observaciones,
@@ -370,8 +358,11 @@ private fun FormularioCorreccionUi(correccion: FormularioCorreccion, viewModel: 
             supportingText = {
                 Text(correccion.errorObservaciones ?: "${correccion.observaciones.length}/${DetalleViewModel.MAX_OBSERVACIONES}")
             },
+            shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth()
         )
+
+        SelectorFoto(fotoUri = correccion.fotoUri, onFotoChange = viewModel::onFotoChange)
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(onClick = viewModel::cancelarCorreccion, modifier = Modifier.weight(1f).height(48.dp)) {
@@ -382,4 +373,26 @@ private fun FormularioCorreccionUi(correccion: FormularioCorreccion, viewModel: 
             }
         }
     }
+}
+
+@Composable
+private fun CampoCorreccion(
+    valor: String,
+    onCambio: (String) -> Unit,
+    etiqueta: String,
+    error: String?,
+    decimal: Boolean,
+    modifier: Modifier
+) {
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onCambio,
+        label = { Text(etiqueta) },
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { mensaje -> { Text(mensaje) } },
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        shape = RoundedCornerShape(14.dp),
+        modifier = modifier
+    )
 }

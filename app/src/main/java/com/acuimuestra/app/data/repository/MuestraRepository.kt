@@ -25,16 +25,46 @@ class MuestraRepository(private val dao: MuestraDao) {
     fun observar(id: Long): Flow<Muestra?> = dao.observarPorId(id)
 
     fun filtrar(filtro: FiltroMuestras = FiltroMuestras()): Flow<List<Muestra>> =
-        dao.filtrar(filtro.centroId, filtro.lineaId, filtro.operadorId, filtro.estado, filtro.desde, filtro.hasta)
+        dao.filtrar(
+            filtro.centroId,
+            filtro.lineaId,
+            filtro.operadorId,
+            filtro.estado,
+            filtro.desde,
+            filtro.hasta
+        )
 
     fun resumen(filtro: FiltroMuestras = FiltroMuestras()): Flow<List<MuestraResumen>> =
-        dao.resumen(filtro.centroId, filtro.lineaId, filtro.operadorId, filtro.estado, filtro.desde, filtro.hasta)
+        dao.resumen(
+            filtro.centroId,
+            filtro.lineaId,
+            filtro.operadorId,
+            filtro.estado,
+            filtro.desde,
+            filtro.hasta
+        )
 
     fun detalle(id: Long): Flow<MuestraDetalle?> = dao.observarDetalle(id)
 
     suspend fun revisar(id: Long, estado: EstadoRevision, comentario: String?) =
         dao.actualizarEstado(id, estado, comentario?.trim()?.ifBlank { null })
 
-    suspend fun corregir(id: Long, conteo: Int, tramoCm: Int, observaciones: String) =
-        dao.corregir(id, conteo, tramoCm, observaciones, EstadoRevision.CORREGIDO)
+    suspend fun corregir(
+        id: Long,
+        conteo: Int,
+        tramoCm: Int,
+        observaciones: String,
+        calibre: Double?,
+        peso: Double?,
+        fotoUri: String?
+    ) = dao.corregir(
+        id,
+        conteo,
+        tramoCm,
+        observaciones,
+        calibre,
+        peso,
+        fotoUri,
+        EstadoRevision.CORREGIDO
+    )
 }
