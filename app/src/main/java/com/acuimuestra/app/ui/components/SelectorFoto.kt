@@ -1,5 +1,5 @@
 package com.acuimuestra.app.ui.components
-
+import androidx.core.net.toUri
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -130,7 +130,7 @@ fun SelectorFoto(
 fun FotoMuestra(fotoUri: String?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val imagen by produceState<ImageBitmap?>(null, fotoUri) {
-        value = fotoUri?.let { withContext(Dispatchers.IO) { cargarImagen(context, Uri.parse(it)) } }
+        value = fotoUri?.let { withContext(Dispatchers.IO) { cargarImagen(context, it.toUri()) } }
     }
     Box(
         modifier
@@ -174,7 +174,7 @@ private fun copiarAFotos(context: Context, origen: Uri): Uri? = runCatching {
 }.getOrNull()
 
 private fun borrarFoto(context: Context, uri: String) {
-    runCatching { context.contentResolver.delete(Uri.parse(uri), null, null) }
+    runCatching { context.contentResolver.delete(uri.toUri(), null, null) }
 }
 
 private fun cargarImagen(context: Context, uri: Uri, ladoMaximo: Int = 1024): ImageBitmap? = runCatching {
