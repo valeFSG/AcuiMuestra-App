@@ -1,20 +1,54 @@
 package com.acuimuestra.app.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,14 +62,12 @@ import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.ui.theme.colores
 import com.acuimuestra.app.viewmodel.HistorialViewModel
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 
 @Composable
 fun HistorialScreen(
     onVerDetalle: (Long) -> Unit,
     onVolver: () -> Unit,
+    onExportar: () -> Unit,
     viewModel: HistorialViewModel = viewModel(factory = HistorialViewModel.Factory)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -56,8 +88,32 @@ fun HistorialScreen(
             ) {
                 Text("‹ Inicio", color = Color.White, fontWeight = FontWeight.SemiBold)
             }
-            Text("Historial de muestras", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
-            Text("${estado.muestras.size} resultado(s)", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Historial de muestras",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        "${estado.muestras.size} resultado(s)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
+                OutlinedButton(
+                    onClick = onExportar,
+                    enabled = estado.todas.isNotEmpty(),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color.White.copy(alpha = 0.7f)
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Exportar CSV")
+                }
+            }
             Spacer(Modifier.height(16.dp))
             TextField(
                 value = estado.busqueda,
@@ -96,9 +152,15 @@ fun HistorialScreen(
             estado.cargando -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
+
             estado.muestras.isEmpty() -> SinResultados()
             else -> LazyColumn(
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 12.dp,
+                    bottom = 24.dp
+                ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.navigationBarsPadding()
             ) {
@@ -243,5 +305,50 @@ fun EtiquetaEstado(estado: EstadoRevision) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )
+    }
+}
+
+private enum class PasoExportar { ELEGIR, VISTA_PREVIA }
+
+@Composable
+private fun DialogoElegirExportacion(
+    filtradas: Int,
+    todas: Int,
+    exportarTodas: Boolean,
+    onCambiar: (Boolean) -> Unit,
+    onContinuar: () -> Unit,
+    onCancelar: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text("¿Qué quieres exportar?") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                OpcionExportar("Lo que estoy viendo", "$filtradas muestra(s) con los filtros actuales", !exportarTodas, filtradas > 0) { onCambiar(false) }
+                OpcionExportar("Todas las muestras", "$todas muestra(s) registradas", exportarTodas, todas > 0) { onCambiar(true) }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onContinuar, enabled = (if (exportarTodas) todas else filtradas) > 0) { Text("Ver vista previa") }
+        },
+        dismissButton = { TextButton(onClick = onCancelar) { Text("Cancelar") } }
+    )
+}
+
+@Composable
+private fun OpcionExportar(titulo: String, detalle: String, seleccionada: Boolean, habilitada: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .selectable(selected = seleccionada, enabled = habilitada, onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = seleccionada, onClick = null, enabled = habilitada)
+        Column(Modifier.padding(start = 8.dp)) {
+            Text(titulo, style = MaterialTheme.typography.bodyLarge)
+            Text(detalle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }

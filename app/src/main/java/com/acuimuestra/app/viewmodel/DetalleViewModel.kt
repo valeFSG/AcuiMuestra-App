@@ -21,10 +21,16 @@ data class FormularioCorreccion(
     val conteo: String,
     val tramo: String,
     val observaciones: String,
+    val calibre: String,
+    val peso: String,
+    val fotoUri: String?,
     val errorConteo: String? = null,
     val errorTramo: String? = null,
-    val errorObservaciones: String? = null
+    val errorObservaciones: String? = null,
+    val errorCalibre: String? = null,
+    val errorPeso: String? = null
 )
+
 data class DetalleUiState(
     val cargando: Boolean = true,
     val muestra: MuestraDetalle? = null,
@@ -96,12 +102,26 @@ class DetalleViewModel(
         cambiarEstado(EstadoRevision.VALIDADO, comentario, "Muestra validada")
     }
 
+    fun comentarioEsValido(): Boolean {
+        val error = validarComentario(formulario.value.comentario)
+        formulario.update { it.copy(errorComentario = error) }
+        return error == null
+    }
+
+    fun descartar() {
+        if (!comentarioEsValido()) return
+        cambiarEstado(EstadoRevision.DESCARTADO, formulario.value.comentario.trim(), "Muestra descartada")
+    }
+
     fun iniciarCorreccion() {
-        val muestra = estado.value.muestra ?: return
+        val m = estado.value.muestra ?: return
         correccion.value = FormularioCorreccion(
-            conteo = muestra.conteo.toString(),
-            tramo = muestra.tramoCm.toString(),
-            observaciones = muestra.observaciones
+            conteo = m.conteo.toString(),
+            tramo = m.tramoCm.toString(),
+            observaciones = m.observaciones,
+            calibre = m.calibrePromedioMm?.toString() ?: "",
+            peso = m.pesoGramos?.toString() ?: "",
+            fotoUri = m.fotoUri
         )
     }
 
@@ -109,48 +129,58 @@ class DetalleViewModel(
         correccion.value = null
     }
 
-    fun onConteoChange(valor: String) = correccion.update { actual ->
-        actual?.copy(conteo = valor, errorConteo = actual.errorConteo?.let { validarEntero(valor, "El conteo") })
+    fun onConteoChange(valor: String) = correccion.update { c ->
+        c?.copy(conteo = valor, errorConteo = c.errorConteo?.let { validarEntero(valor, "El conteo") })
     }
 
-    fun onTramoChange(valor: String) = correccion.update { actual ->
-        actual?.copy(tramo = valor, errorTramo = actual.errorTramo?.let { validarEntero(valor, "El tramo") })
+    fun onTramoChange(valor: String) = correccion.update { c ->
+        c?.copy(tramo = valor, errorTramo = c.errorTramo?.let { validarEntero(valor, "El tramo") })
     }
 
-    fun onObservacionesChange(valor: String) = correccion.update { actual ->
-        actual?.copy(observaciones = valor, errorObservaciones = validarObservaciones(valor))
+    fun onObservacionesChange(valor: String) = correccion.update { c ->
+        c?.copy(observaciones = valor, errorObservaciones = validarObservaciones(valor))
     }
+
+    fun onCalibreChange(valor: String) = correccion.update { c ->
+        c?.copy(calibre = valor, errorCalibre = c.errorCalibre?.let { validarCalibre(valor) })
+    }
+
+    fun onPesoChange(valor: String) = correccion.update { c ->
+        c?.copy(peso = valor, errorPeso = c.errorPeso?.let { validarPeso(valor) })
+    }
+
+    fun onFotoChange(uri: String?) = correccion.update { it?.copy(fotoUri = uri) }
 
     fun guardarCorreccion() {
-        val actual = correccion.value ?: return
-        val errorConteo = validarEntero(actual.conteo, "El conteo")
-        val errorTramo = validarEntero(actual.tramo, "El tramo")
-        val errorObs = validarObservaciones(actual.observaciones)
-        if (errorConteo != null || errorTramo != null || errorObs != null) {
-            correccion.value = actual.copy(errorConteo = errorConteo, errorTramo = errorTramo, errorObservaciones = errorObs)
+        val c = correccion.value ?: return
+        val revisada = c.copy(
+            errorConteo = validarEntero(c.conteo, "El conteo"),
+            errorTramo = validarEntero(c.tramo, "El tramo"),
+            errorObservaciones = validarObservaciones(c.observaciones),
+            errorCalibre = validarCalibre(c.calibre),
+            errorPeso = validarPeso(c.peso)
+        )
+        val hayErrores = listOf(
+            revisada.errorConteo, revisada.errorTramo, revisada.errorObservaciones,
+            revisada.errorCalibre, revisada.errorPeso
+        ).any { it != null }
+        if (hayErrores) {
+            correccion.value = revisada
             return
         }
         viewModelScope.launch {
             muestraRepository.corregir(
-                muestraId,
-                actual.conteo.trim().toInt(),
-                actual.tramo.trim().toInt(),
-                actual.observaciones.trim()
+                id = muestraId,
+                conteo = c.conteo.trim().toInt(),
+                tramoCm = c.tramo.trim().toInt(),
+                observaciones = c.observaciones.trim(),
+                calibre = ReglasRegistro.aDecimal(c.calibre),
+                peso = ReglasRegistro.aDecimal(c.peso),
+                fotoUri = c.fotoUri
             )
             correccion.value = null
             formulario.value = FormularioRevision(mensaje = "Corrección guardada. La muestra vuelve a revisión.")
         }
-    }
-
-    fun comentarioEsValido(): Boolean{
-        val error = validarComentario(formulario.value.comentario)
-        formulario.update { it.copy(errorComentario = error) }
-        return  error == null
-    }
-
-    fun descartar() {
-        if (!comentarioEsValido()) return
-        cambiarEstado(EstadoRevision.DESCARTADO, formulario.value.comentario.trim(), "Muestra descartada")
     }
 
     private fun cambiarEstado(nuevo: EstadoRevision, comentario: String?, mensaje: String) {
@@ -162,14 +192,13 @@ class DetalleViewModel(
 
     companion object {
         const val MIN_COMENTARIO = 10
+        const val MAX_OBSERVACIONES = 200
 
         fun validarComentario(valor: String): String? = when {
             valor.isBlank() -> "El comentario es obligatorio"
             valor.trim().length < MIN_COMENTARIO -> "Debe tener al menos $MIN_COMENTARIO caracteres"
             else -> null
         }
-
-        const val MAX_OBSERVACIONES = 200
 
         fun validarEntero(valor: String, campo: String): String? {
             if (valor.isBlank()) return "$campo es obligatorio"
@@ -179,6 +208,12 @@ class DetalleViewModel(
 
         fun validarObservaciones(valor: String): String? =
             if (valor.length > MAX_OBSERVACIONES) "Máximo $MAX_OBSERVACIONES caracteres" else null
+
+        fun validarCalibre(valor: String): String? =
+            ReglasRegistro.decimalOpcional(valor, ReglasRegistro.MAX_CALIBRE_MM, "mm")
+
+        fun validarPeso(valor: String): String? =
+            ReglasRegistro.decimalOpcional(valor, ReglasRegistro.MAX_PESO_G, "g")
 
         fun factory(muestraId: Long) = viewModelFactory {
             initializer {

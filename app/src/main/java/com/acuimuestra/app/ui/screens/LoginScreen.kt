@@ -136,13 +136,6 @@ fun LoginScreen(
                     }
                 }
             }
-
-            Spacer(Modifier.height(20.dp))
-            Text(
-                "Usuarios de prueba: operador / 1234 · supervisor / 1234",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

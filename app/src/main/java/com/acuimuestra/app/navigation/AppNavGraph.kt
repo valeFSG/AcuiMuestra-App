@@ -68,9 +68,14 @@ fun AppNavGraph() {
         composable(Ruta.Historial.ruta) {
             HistorialScreen(
                 onVerDetalle = { id -> nav.navigate(Ruta.Detalle.crear(id)) },
-                onVolver = { nav.popBackStack() }
+                onVolver = { nav.popBackStack() },
+                onExportar = { nav.navigate(Ruta.Exportar.ruta) }
             )
         }
+        composable(Ruta.Exportar.ruta) {
+            ExportarScreen(onVolver = { nav.popBackStack() })
+        }
+
         composable(
             route = Ruta.Detalle.ruta,
             arguments = listOf(navArgument("muestraId") { type = NavType.LongType })
