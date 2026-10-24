@@ -50,8 +50,12 @@ fun AppNavGraph() {
                     onVolver = { nav.popBackStack() }
                 )
             }
-            composable(Ruta.Fotografia.ruta) {
-                FotografiaScreen(onSiguiente = { nav.navigate(Ruta.Resumen.ruta) })
+            composable(Ruta.Fotografia.ruta) { entry ->
+                FotografiaScreen(
+                    viewModel = entry.registroViewModel(nav),
+                    onSiguiente = { nav.navigate(Ruta.Resumen.ruta) },
+                    onVolver = { nav.popBackStack() }
+                )
             }
             composable(Ruta.Resumen.ruta) {
                 ResumenScreen(onGuardado = { volverAlInicio() })
