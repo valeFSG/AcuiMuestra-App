@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.acuimuestra.app.ui.comoFechaHora
+import com.acuimuestra.app.ui.components.SelectorFechaHora
 import com.acuimuestra.app.viewmodel.CampoRegistro
 import com.acuimuestra.app.viewmodel.RegistroViewModel
 
@@ -77,15 +77,10 @@ fun NuevaMuestraScreen(
             onSeleccionar = viewModel::seleccionarLinea
         )
 
-        OutlinedTextField(
-            value = f.fechaHora.comoFechaHora(),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Fecha y hora *") },
-            isError = f.errores[CampoRegistro.FECHA] != null,
-            supportingText = { Text(f.errores[CampoRegistro.FECHA] ?: "Se registra la fecha y hora actual") },
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth()
+        SelectorFechaHora(
+            fechaHora = f.fechaHora,
+            onFechaHoraChange = viewModel::onFechaHoraChange,
+            error = f.errores[CampoRegistro.FECHA]
         )
 
         OutlinedTextField(
