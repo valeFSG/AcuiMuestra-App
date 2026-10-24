@@ -57,11 +57,14 @@ fun AppNavGraph() {
                     onVolver = { nav.popBackStack() }
                 )
             }
-            composable(Ruta.Resumen.ruta) {
-                ResumenScreen(onGuardado = { volverAlInicio() })
+            composable(Ruta.Resumen.ruta) { entry ->
+                ResumenScreen(
+                    viewModel = entry.registroViewModel(nav),
+                    onGuardado = { volverAlInicio() },
+                    onVolver = { nav.popBackStack() }
+                )
             }
         }
-
         composable(Ruta.Historial.ruta) {
             HistorialScreen(onVerDetalle = { id -> nav.navigate(Ruta.Detalle.crear(id)) })
         }
