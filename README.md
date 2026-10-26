@@ -94,3 +94,18 @@ Versiones: AGP 8.12, Gradle 8.13, Kotlin 2.2, Java 21.
 - `main` contiene siempre la versión estable.
 - Cada funcionalidad se desarrolla en una rama `feature/...`.
 - Cada rama se integra con un **Pull Request** revisado
+
+icación
+
+Las tareas del equipo están organizadas en Trello, con quién hizo cada una y su Pull Request asociado:
+[Tablero AcuiMuestra – DSY1105](https://trello.com/b/wBnok8gn/acuimuestra-dsy1105)
+
+## Créditos de imágenes
+
+Fotografías de las tarjetas del inicio, obtenidas de [Unsplash](https://unsplash.com) (licencia libre):
+
+- `inicio_nueva_muestra.jpg`: foto de Romain Water
+- `inicio_historial.jpg`: foto de Torkil Torgard
+- `inicio_revisar.jpg`: foto de Julia Taubitz
+
+Logo e ícono de AcuiMuestra elaborados para el proyecto.
