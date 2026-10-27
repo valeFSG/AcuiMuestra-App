@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.acuimuestra.app.ui.components.SelectorFechaHora
 import com.acuimuestra.app.viewmodel.CampoRegistro
 import com.acuimuestra.app.viewmodel.RegistroViewModel
 
@@ -77,11 +76,20 @@ fun NuevaMuestraScreen(
             onSeleccionar = viewModel::seleccionarLinea
         )
 
-        SelectorFechaHora(
-            fechaHora = f.fechaHora,
-            onFechaHoraChange = viewModel::onFechaHoraChange,
-            error = f.errores[CampoRegistro.FECHA]
-        )
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Fecha y hora", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Se registra automáticamente al guardar, usando la hora de red. No se puede modificar.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
 
         OutlinedTextField(
             value = f.tramoCm,

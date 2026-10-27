@@ -8,6 +8,7 @@ import com.acuimuestra.app.data.model.Centro
 import com.acuimuestra.app.data.model.Linea
 import com.acuimuestra.app.data.model.Muestra
 import com.acuimuestra.app.data.model.Tren
+import com.acuimuestra.app.data.remote.RelojRed
 import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
@@ -31,7 +32,9 @@ data class FormularioRegistro(
     val errores: Map<CampoRegistro, String> = emptyMap(),
     val guardando: Boolean = false,
     val muestraGuardadaId: Long? = null,
-    val errorGeneral: String? = null
+    val errorGeneral: String? = null,
+    val fechaGuardada: Long? = null,
+    val horaVerificada: Boolean = true
 )
 
 data class RegistroUiState(
@@ -90,7 +93,8 @@ object ReglasRegistro {
 class RegistroViewModel(
     private val muestraRepository: MuestraRepository,
     catalogoRepository: CatalogoRepository,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val relojRed: RelojRed
 ) : ViewModel() {
 
     private val formulario = MutableStateFlow(FormularioRegistro())
@@ -154,6 +158,7 @@ class RegistroViewModel(
         }
         viewModelScope.launch {
             formulario.update { it.copy(guardando = true, errorGeneral = null) }
+            val hora = relojRed.ahora()
             runCatching {
                 muestraRepository.guardar(
                     Muestra(
@@ -161,7 +166,8 @@ class RegistroViewModel(
                         trenId = trenId,
                         lineaId = lineaId,
                         operadorId = operador.id,
-                        fechaHora = f.fechaHora,
+                        fechaHora = hora.millis,
+                        horaVerificada = hora.verificada,
                         tramoCm = f.tramoCm.trim().toInt(),
                         conteo = f.conteo.trim().toInt(),
                         observaciones = f.observaciones.trim(),
@@ -171,7 +177,14 @@ class RegistroViewModel(
                     )
                 )
             }.onSuccess { id ->
-                formulario.update { it.copy(guardando = false, muestraGuardadaId = id) }
+                formulario.update {
+                    it.copy(
+                        guardando = false,
+                        muestraGuardadaId = id,
+                        fechaGuardada = hora.millis,
+                        horaVerificada = hora.verificada
+                    )
+                }
             }.onFailure {
                 formulario.update { it.copy(guardando = false, errorGeneral = "No se pudo guardar la muestra") }
             }
@@ -203,7 +216,7 @@ class RegistroViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val contenedor = contenedor()
-                RegistroViewModel(contenedor.muestraRepository, contenedor.catalogoRepository, contenedor.usuarioRepository)
+                RegistroViewModel(contenedor.muestraRepository, contenedor.catalogoRepository, contenedor.usuarioRepository, contenedor.relojRed)
             }
         }
     }

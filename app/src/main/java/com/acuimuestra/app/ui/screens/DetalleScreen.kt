@@ -76,7 +76,11 @@ fun DetalleScreen(
                         Dato("Tren · Línea", "${muestra.trenNombre} · ${muestra.lineaNombre}")
                     }
                     Seccion("Registro") {
-                        Dato("Fecha y hora", muestra.fechaHora.comoFechaHora())
+                        Dato(
+                            "Fecha y hora",
+                            muestra.fechaHora.comoFechaHora() +
+                                    if (muestra.horaVerificada) " · hora de red" else " · ⚠ no verificada (sin conexión)"
+                        )
                         Dato("Operador", muestra.operadorNombre)
                         Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
                     }
