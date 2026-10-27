@@ -63,7 +63,7 @@ fun ResumenScreen(
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 FilaResumen("Centro", centro)
                 FilaResumen("Tren · Línea", "$tren · $linea")
-                FilaResumen("Fecha y hora", f.fechaHora.comoFechaHora())
+                FilaResumen("Fecha y hora", "Se asigna al guardar (hora de red)")
                 FilaResumen("Tramo muestreado", "${f.tramoCm.trim()} cm")
                 FilaResumen("Conteo", "${f.conteo.trim()} individuos")
                 if (f.calibrePromedioMm.isNotBlank()) FilaResumen("Calibre promedio", "${f.calibrePromedioMm.trim()} mm")
@@ -95,7 +95,13 @@ fun ResumenScreen(
         AlertDialog(
             onDismissRequest = {},
             title = { Text("Muestra #$id guardada") },
-            text = { Text("La muestra quedó registrada como Pendiente de revisión por el supervisor.") },
+            text = {
+                Text(
+                    "Fecha y hora: ${f.fechaGuardada?.comoFechaHora() ?: "—"}" +
+                            (if (f.horaVerificada) " (hora de red)." else " (sin conexión: hora del dispositivo, no verificada).") +
+                            "\nQuedó Pendiente de revisión por el supervisor."
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.reiniciar()

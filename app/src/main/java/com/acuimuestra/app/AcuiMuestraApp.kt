@@ -3,6 +3,7 @@ package com.acuimuestra.app
 import android.app.Application
 import com.acuimuestra.app.data.local.AcuiMuestraDatabase
 import com.acuimuestra.app.data.local.DatosPrueba
+import com.acuimuestra.app.data.remote.RelojRed
 import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
@@ -15,6 +16,7 @@ class AppContainer(db: AcuiMuestraDatabase) {
     val usuarioRepository = UsuarioRepository(db.usuarioDao())
     val catalogoRepository = CatalogoRepository(db.catalogoDao())
     val muestraRepository = MuestraRepository(db.muestraDao())
+    val relojRed = RelojRed()
 }
 
 class AcuiMuestraApp : Application() {

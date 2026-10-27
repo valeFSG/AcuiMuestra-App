@@ -77,7 +77,7 @@ interface MuestraDao {
         """
         SELECT m.id, m.fechaHora, m.tramoCm, m.conteo, m.observaciones, m.fotoUri,
                m.calibrePromedioMm, m.calibreMinMm, m.calibreMaxMm, m.pesoGramos,
-               m.estado, m.comentarioSupervisor,
+               m.estado, m.comentarioSupervisor, m.horaVerificada,
                c.nombre AS centroNombre, t.nombre AS trenNombre,
                l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
         FROM muestras m

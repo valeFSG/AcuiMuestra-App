@@ -12,7 +12,7 @@ import com.acuimuestra.app.data.model.Usuario
 
 @Database(
     entities = [Usuario::class, Centro::class, Tren::class, Linea::class, Muestra::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AcuiMuestraDatabase : RoomDatabase() {

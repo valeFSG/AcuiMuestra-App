@@ -31,5 +31,6 @@ data class Muestra(
     val calibreMaxMm: Double? = null,
     val pesoGramos: Double? = null,
     val estado: EstadoRevision = EstadoRevision.PENDIENTE,
-    val comentarioSupervisor: String? = null
+    val comentarioSupervisor: String? = null,
+    val horaVerificada: Boolean = true
 )
