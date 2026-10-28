@@ -10,17 +10,17 @@ Proyecto académico de la asignatura **DSY1105 Desarrollo de Aplicaciones Móvil
 | Integrante | GitHub | Aportes principales |
 |---|---|---|
 | Valentina Santana Guajardo | [@valeFSG](https://github.com/valeFSG) | Base del proyecto, capa de datos (Room), login y roles, historial con búsqueda y filtros, detalle y revisión del supervisor, registro de muestras en 4 pasos, exportación CSV, diseño de pantallas |
-| Nicol González Cobi | [@Nicol416](https://github.com/Nicol416) | Paleta y tema Material 3, imágenes del inicio, selector de fecha y hora, selector de fotografía (cámara y galería), logo e ícono de la app |
+| Nicol González Cobi | [@Nicol416](https://github.com/Nicol416) | Paleta y tema Material 3, imágenes del inicio, selector de fotografía (cámara y galería), fecha y hora desde la red (NTP), logo e ícono de la app |
 
 ## Funcionalidades
 
 | Requerimiento | Funcionalidad |
 |---|---|
 | RF01 | Login con usuarios ficticios y opciones distintas según rol (operador / supervisor) |
-| RF02 | Registro de muestra: centro, tren y línea en cascada, fecha y hora, tramo muestreado |
+| RF02 | Registro de muestra: centro, tren y línea en cascada, tramo muestreado y fecha/hora automática desde la red (no editable) |
 | RF03 | Conteo manual de individuos y observaciones |
 | RF04 | Fotografía de la muestra con cámara o galería |
-| RF05 | Validaciones: campos obligatorios, números válidos, rangos máximos y fecha no futura |
+| RF05 | Validaciones: campos obligatorios, números válidos y rangos máximos |
 | RF06 | Datos opcionales: calibre promedio y peso |
 | RF07 | Historial de muestras y detalle con foto y métricas |
 | RF08 | Búsqueda por texto y filtros por centro y estado de revisión |
@@ -31,6 +31,9 @@ Proyecto académico de la asignatura **DSY1105 Desarrollo de Aplicaciones Móvil
 `Pendiente` → `Observado` → `Corregido` → `Validado` o `Descartado`
 
 Las muestras validadas o descartadas quedan cerradas. Las muestras **no se eliminan**: se descartan con un comentario, para mantener la trazabilidad.
+
+### Fecha y hora de registro
+La fecha y hora **no se ingresan a mano**: se obtienen de la red al guardar la muestra (servidor NTP y, como respaldo, un servidor web). Si no hay conexión, se usa la hora del dispositivo y la muestra queda marcada como **no verificada**.
 
 ## Usuarios de prueba
 
@@ -43,10 +46,10 @@ Las muestras validadas o descartadas quedan cerradas. Las muestras **no se elimi
 
 - **Kotlin** + **Jetpack Compose** + **Material 3**
 - Arquitectura **MVVM** (Model, View, ViewModel, Repository)
-- **StateFlow** para el estado de las pantallas
+- **StateFlow** y corrutinas para el estado de las pantallas
 - **Room (SQLite)** para la persistencia local
 - **Navigation Compose**, con un subgrafo que comparte el ViewModel del registro en 4 pasos
-- Recursos nativos: **DatePicker / TimePicker**, **cámara** (`TakePicture`), **galería** (`PickVisualMedia`), **FileProvider** y **menú Compartir** de Android
+- Recursos nativos: **conexión a internet** (hora de red por NTP, con respaldo web y marca de "no verificada" sin conexión), **cámara** (`TakePicture`), **galería** (`PickVisualMedia`), **FileProvider** y **menú Compartir** de Android
 
 ## Estructura del proyecto
 
@@ -55,10 +58,11 @@ app/src/main/java/com/acuimuestra/app
 ├── data
 │   ├── local        # Base de datos Room, DAOs y datos de prueba
 │   ├── model        # Entidades y modelos (Muestra, Centro, Tren, Linea, Usuario...)
+│   ├── remote       # Hora de red (NTP / web) para la fecha de registro
 │   └── repository   # Repositorios (acceso a datos para los ViewModel)
 ├── navigation       # Rutas y grafo de navegación
 ├── ui
-│   ├── components   # Selector de fecha/hora y selector de foto
+│   ├── components   # Selector de foto
 │   ├── screens      # Pantallas de la app
 │   └── theme        # Colores, tema y colores por estado
 ├── viewmodel        # ViewModels con la lógica y las validaciones
@@ -72,7 +76,7 @@ app/src/main/java/com/acuimuestra/app
 |---|---|
 | `usuarios` | Usuarios ficticios y su rol |
 | `centros` / `trenes` / `lineas` | Jerarquía de ubicación de cultivo |
-| `muestras` | Datos de cada muestra, ruta de la foto, estado y comentario del supervisor |
+| `muestras` | Datos de cada muestra, ruta de la foto, fecha y hora (verificada o no), estado y comentario del supervisor |
 
 Las fotos se guardan como archivo en la carpeta interna de la app; la base guarda solo su ruta.
 
@@ -93,9 +97,9 @@ Versiones: AGP 8.12, Gradle 8.13, Kotlin 2.2, Java 21.
 
 - `main` contiene siempre la versión estable.
 - Cada funcionalidad se desarrolla en una rama `feature/...`.
-- Cada rama se integra con un **Pull Request** revisado
+- Cada rama se integra con un **Pull Request** revisado por la otra integrante antes del merge.
 
-icación
+## Planificación
 
 Las tareas del equipo están organizadas en Trello, con quién hizo cada una y su Pull Request asociado:
 [Tablero AcuiMuestra – DSY1105](https://trello.com/b/wBnok8gn/acuimuestra-dsy1105)
