@@ -66,6 +66,7 @@ class RegistroViewModelTest {
         viewModel.seleccionarCentro(1)
         viewModel.seleccionarTren(1)
         viewModel.seleccionarLinea(1)
+        viewModel.onFotoChange("file:///foto.jpg")
     }
 
     @Test
@@ -175,7 +176,10 @@ class RegistroViewModelTest {
         viewModel.onObservacionesChange("  Sin daños  ")
         viewModel.onCalibreChange("42,5")
         viewModel.onPesoChange("1200")
-        viewModel.onFotoChange("file:///foto.jpg")
+        viewModel.agregarMarca(0.2f, 0.3f)
+        viewModel.agregarMarca(0.5f, 0.5f)
+        viewModel.usarConteoAsistido()
+        viewModel.onConteoChange("185")
         val guardada = slot<Muestra>()
         coEvery { muestraRepository.guardar(capture(guardada)) } returns 9L
 
@@ -194,6 +198,7 @@ class RegistroViewModelTest {
             assertEquals(Datos.operador.id, operadorId)
             assertEquals(5_000L, fechaHora)
             assertEquals("file:///foto.jpg", fotoUri)
+            assertEquals(2, conteoMarcado)
         }
     }
 
@@ -243,6 +248,57 @@ class RegistroViewModelTest {
 
         assertNull(formulario.centroId)
         assertNull(formulario.fotoUri)
+    }
+
+    @Test
+    fun fotoObligatoria_noDejaAvanzarSinFoto() = runTest {
+        observar()
+
+        assertFalse(viewModel.validarFoto())
+        assertEquals("Falta la fotografía de la muestra", formulario.errorGeneral)
+
+        viewModel.onFotoChange("file:///foto.jpg")
+        assertNull(formulario.errorGeneral)
+        assertTrue(viewModel.validarFoto())
+    }
+
+    @Test
+    fun conteoAsistido_marcaDeshaceYUsaElTotal() = runTest {
+        observar()
+        viewModel.onFotoChange("file:///foto.jpg")
+
+        viewModel.usarConteoAsistido()
+        assertEquals("", formulario.conteo)
+
+        viewModel.agregarMarca(0.1f, 0.1f)
+        viewModel.agregarMarca(1.5f, -0.2f)
+        viewModel.agregarMarca(0.4f, 0.6f)
+        assertEquals(Marca(1f, 0f), formulario.marcas[1])
+
+        viewModel.deshacerMarca()
+        assertEquals(2, formulario.marcas.size)
+
+        viewModel.usarConteoAsistido()
+        assertEquals("2", formulario.conteo)
+        assertEquals(2, formulario.conteoMarcado)
+
+        viewModel.limpiarMarcas()
+        assertTrue(formulario.marcas.isEmpty())
+    }
+
+    @Test
+    fun cambiarLaFoto_borraLasMarcas() = runTest {
+        observar()
+        viewModel.onFotoChange("file:///foto.jpg")
+        viewModel.agregarMarca(0.5f, 0.5f)
+        viewModel.usarConteoAsistido()
+
+        viewModel.onFotoChange("file:///foto.jpg")
+        assertEquals(1, formulario.marcas.size)
+
+        viewModel.onFotoChange("file:///otra.jpg")
+        assertTrue(formulario.marcas.isEmpty())
+        assertNull(formulario.conteoMarcado)
     }
 
     @Test

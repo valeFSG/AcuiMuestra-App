@@ -18,5 +18,6 @@ public record MuestraRequest(
         @DecimalMax(value = "10000", message = "Debe ser menor o igual a 10000 g") Double pesoGramos,
         @NotNull(message = "La fecha y hora es obligatoria") Long fechaHora,
         Boolean horaVerificada,
-        @Size(max = 120) String fotoNombre
+        @Size(max = 120) String fotoNombre,
+        @Min(value = 1, message = "Debe ser mayor a 0") Integer conteoMarcado
 ) {}

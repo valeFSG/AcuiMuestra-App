@@ -16,6 +16,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+data class Marca(val x: Float, val y: Float)
+
 enum class CampoRegistro { CENTRO, TREN, LINEA, FECHA, TRAMO, CONTEO, OBSERVACIONES, CALIBRE, PESO }
 
 data class FormularioRegistro(
@@ -27,6 +29,8 @@ data class FormularioRegistro(
     val conteo: String = "",
     val observaciones: String = "",
     val fotoUri: String? = null,
+    val marcas: List<Marca> = emptyList(),
+    val conteoMarcado: Int? = null,
     val calibrePromedioMm: String = "",
     val pesoGramos: String = "",
     val errores: Map<CampoRegistro, String> = emptyMap(),
@@ -52,7 +56,7 @@ object ReglasRegistro {
     const val MAX_PESO_G = 10_000.0
 
     const val MAX_CALIBRE_MM = 150.0
-    const val FOTO_OBLIGATORIA = false
+    const val FOTO_OBLIGATORIA = true
 
     fun validar(campo: CampoRegistro, f: FormularioRegistro): String? = when (campo) {
         CampoRegistro.CENTRO -> if (f.centroId == null) "Selecciona un centro" else null
@@ -129,7 +133,32 @@ class RegistroViewModel(
     fun onObservacionesChange(valor: String) = actualizar(CampoRegistro.OBSERVACIONES) { it.copy(observaciones = valor) }
     fun onCalibreChange(valor: String) = actualizar(CampoRegistro.CALIBRE) { it.copy(calibrePromedioMm = valor) }
     fun onPesoChange(valor: String) = actualizar(CampoRegistro.PESO) { it.copy(pesoGramos = valor) }
-    fun onFotoChange(uri: String?) = formulario.update { it.copy(fotoUri = uri, errorGeneral = null) }
+    fun onFotoChange(uri: String?) = formulario.update {
+        if (uri == it.fotoUri) it
+        else it.copy(fotoUri = uri, marcas = emptyList(), conteoMarcado = null, errorGeneral = null)
+    }
+
+    fun validarFoto(): Boolean {
+        if (ReglasRegistro.FOTO_OBLIGATORIA && formulario.value.fotoUri == null) {
+            formulario.update { it.copy(errorGeneral = "Falta la fotografía de la muestra") }
+            return false
+        }
+        return true
+    }
+
+    fun agregarMarca(x: Float, y: Float) = formulario.update {
+        it.copy(marcas = it.marcas + Marca(x.coerceIn(0f, 1f), y.coerceIn(0f, 1f)))
+    }
+
+    fun deshacerMarca() = formulario.update { it.copy(marcas = it.marcas.dropLast(1)) }
+
+    fun limpiarMarcas() = formulario.update { it.copy(marcas = emptyList()) }
+
+    fun usarConteoAsistido() {
+        val total = formulario.value.marcas.size
+        if (total == 0) return
+        actualizar(CampoRegistro.CONTEO) { it.copy(conteo = total.toString(), conteoMarcado = total) }
+    }
 
     fun validarDatos(): Boolean = validarCampos(CampoRegistro.entries)
 
@@ -144,10 +173,7 @@ class RegistroViewModel(
     fun guardar() {
         if (!validarDatos()) return
         val f = formulario.value
-        if (ReglasRegistro.FOTO_OBLIGATORIA && f.fotoUri == null) {
-            formulario.update { it.copy(errorGeneral = "Falta la fotografía de la muestra") }
-            return
-        }
+        if (!validarFoto()) return
         val operador = usuarioRepository.usuarioActual.value
         val centroId = f.centroId
         val trenId = f.trenId
@@ -173,7 +199,8 @@ class RegistroViewModel(
                         observaciones = f.observaciones.trim(),
                         fotoUri = f.fotoUri,
                         calibrePromedioMm = ReglasRegistro.aDecimal(f.calibrePromedioMm),
-                        pesoGramos = ReglasRegistro.aDecimal(f.pesoGramos)
+                        pesoGramos = ReglasRegistro.aDecimal(f.pesoGramos),
+                        conteoMarcado = f.conteoMarcado
                     )
                 )
             }.onSuccess { id ->
