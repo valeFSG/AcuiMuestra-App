@@ -91,3 +91,21 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+kover {
+    reports {
+        filters {
+            includes {
+                packages("com.acuimuestra.app.viewmodel", "com.acuimuestra.app.data.repository")
+            }
+            excludes {
+                classes("com.acuimuestra.app.viewmodel.ViewModelExtKt", "*\$Companion*")
+            }
+        }
+        verify {
+            rule {
+                minBound(90)
+            }
+        }
+    }
+}
