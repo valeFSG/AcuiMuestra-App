@@ -6,9 +6,11 @@ import androidx.room.Query
 import androidx.room.Update
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.Muestra
-import kotlinx.coroutines.flow.Flow
-import com.acuimuestra.app.data.model.MuestraResumen
 import com.acuimuestra.app.data.model.MuestraDetalle
+import com.acuimuestra.app.data.model.MuestraPendiente
+import com.acuimuestra.app.data.model.MuestraResumen
+import com.acuimuestra.app.data.model.Ubicacion
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MuestraDao {
@@ -42,12 +44,18 @@ interface MuestraDao {
         hasta: Long? = null
     ): Flow<List<Muestra>>
 
-    @Query("UPDATE muestras SET estado = :estado, comentarioSupervisor = :comentario WHERE id = :id")
-    suspend fun actualizarEstado(id: Long, estado: EstadoRevision, comentario: String?)
+    @Query(
+        """
+        UPDATE muestras SET estado = :estado, comentarioSupervisor = :comentario,
+            usuarioCambio = :usuario, sincronizada = 0
+        WHERE id = :id
+        """
+    )
+    suspend fun actualizarEstado(id: Long, estado: EstadoRevision, comentario: String?, usuario: String?)
 
     @Query(
         """
-        SELECT m.id, m.fechaHora, m.conteo, m.estado,
+        SELECT m.id, m.fechaHora, m.conteo, m.estado, m.sincronizada,
                c.nombre AS centroNombre, t.nombre AS trenNombre,
                l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
         FROM muestras m
@@ -75,9 +83,9 @@ interface MuestraDao {
 
     @Query(
         """
-        SELECT m.id, m.fechaHora, m.tramoCm, m.conteo, m.observaciones, m.fotoUri,
+        SELECT m.id, m.uuid, m.fechaHora, m.tramoCm, m.conteo, m.observaciones, m.fotoUri,
                m.calibrePromedioMm, m.calibreMinMm, m.calibreMaxMm, m.pesoGramos,
-               m.estado, m.comentarioSupervisor, m.horaVerificada,
+               m.estado, m.comentarioSupervisor, m.horaVerificada, m.sincronizada,
                c.nombre AS centroNombre, t.nombre AS trenNombre,
                l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
         FROM muestras m
@@ -93,7 +101,8 @@ interface MuestraDao {
     @Query(
         """
         UPDATE muestras SET conteo = :conteo, tramoCm = :tramoCm, observaciones = :observaciones,
-            calibrePromedioMm = :calibre, pesoGramos = :peso, fotoUri = :fotoUri, estado = :estado
+            calibrePromedioMm = :calibre, pesoGramos = :peso, fotoUri = :fotoUri, estado = :estado,
+            usuarioCambio = :usuario, sincronizada = 0
         WHERE id = :id
         """
     )
@@ -105,6 +114,43 @@ interface MuestraDao {
         calibre: Double?,
         peso: Double?,
         fotoUri: String?,
-        estado: EstadoRevision
+        estado: EstadoRevision,
+        usuario: String?
     )
+
+    @Query(
+        """
+        SELECT m.*, c.nombre AS centroNombre, t.nombre AS trenNombre,
+               l.nombre AS lineaNombre, u.usuario AS operadorUsuario
+        FROM muestras m
+        JOIN centros c ON c.id = m.centroId
+        JOIN trenes t ON t.id = m.trenId
+        JOIN lineas l ON l.id = m.lineaId
+        JOIN usuarios u ON u.id = m.operadorId
+        WHERE m.sincronizada = 0
+        ORDER BY m.fechaHora
+        """
+    )
+    suspend fun pendientes(): List<MuestraPendiente>
+
+    @Query("SELECT COUNT(*) FROM muestras WHERE sincronizada = 0")
+    fun contarPendientes(): Flow<Int>
+
+    @Query("UPDATE muestras SET sincronizada = 1 WHERE uuid = :uuid")
+    suspend fun marcarSincronizada(uuid: String)
+
+    @Query("SELECT * FROM muestras WHERE uuid = :uuid LIMIT 1")
+    suspend fun buscarPorUuid(uuid: String): Muestra?
+
+    @Query(
+        """
+        SELECT c.id AS centroId, t.id AS trenId, l.id AS lineaId
+        FROM centros c
+        JOIN trenes t ON t.centroId = c.id
+        JOIN lineas l ON l.trenId = t.id
+        WHERE c.nombre = :centro AND t.nombre = :tren AND l.nombre = :linea
+        LIMIT 1
+        """
+    )
+    suspend fun buscarUbicacion(centro: String, tren: String, linea: String): Ubicacion?
 }

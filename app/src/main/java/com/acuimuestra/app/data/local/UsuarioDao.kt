@@ -14,6 +14,9 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE id = :id")
     suspend fun obtenerPorId(id: Long): Usuario?
 
+    @Query("SELECT * FROM usuarios WHERE usuario = :usuario LIMIT 1")
+    suspend fun buscarPorUsuario(usuario: String): Usuario?
+
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
 

@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 @Entity(
     tableName = "muestras",
@@ -13,10 +14,14 @@ import androidx.room.PrimaryKey
         ForeignKey(entity = Linea::class, parentColumns = ["id"], childColumns = ["lineaId"]),
         ForeignKey(entity = Usuario::class, parentColumns = ["id"], childColumns = ["operadorId"])
     ],
-    indices = [Index("centroId"), Index("trenId"), Index("lineaId"), Index("operadorId"), Index("estado")]
+    indices = [
+        Index("centroId"), Index("trenId"), Index("lineaId"), Index("operadorId"), Index("estado"),
+        Index(value = ["uuid"], unique = true)
+    ]
 )
 data class Muestra(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val uuid: String = UUID.randomUUID().toString(),
     val centroId: Long,
     val trenId: Long,
     val lineaId: Long,
@@ -32,5 +37,7 @@ data class Muestra(
     val pesoGramos: Double? = null,
     val estado: EstadoRevision = EstadoRevision.PENDIENTE,
     val comentarioSupervisor: String? = null,
-    val horaVerificada: Boolean = true
+    val horaVerificada: Boolean = true,
+    val sincronizada: Boolean = false,
+    val usuarioCambio: String? = null
 )

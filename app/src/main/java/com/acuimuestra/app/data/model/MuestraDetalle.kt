@@ -2,6 +2,7 @@ package com.acuimuestra.app.data.model
 
 data class MuestraDetalle(
     val id: Long,
+    val uuid: String,
     val fechaHora: Long,
     val tramoCm: Int,
     val conteo: Int,
@@ -17,5 +18,6 @@ data class MuestraDetalle(
     val trenNombre: String,
     val lineaNombre: String,
     val operadorNombre: String,
-    val horaVerificada: Boolean
+    val horaVerificada: Boolean,
+    val sincronizada: Boolean
 )
