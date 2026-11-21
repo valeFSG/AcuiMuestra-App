@@ -108,7 +108,7 @@ fun NuevaMuestraScreen(
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {
-            Text("Siguiente: conteo", fontWeight = FontWeight.SemiBold)
+            Text("Siguiente: fotografía", fontWeight = FontWeight.SemiBold)
         }
     }
 }

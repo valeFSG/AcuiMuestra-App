@@ -19,5 +19,6 @@ data class MuestraDetalle(
     val lineaNombre: String,
     val operadorNombre: String,
     val horaVerificada: Boolean,
-    val sincronizada: Boolean
+    val sincronizada: Boolean,
+    val conteoMarcado: Int? = null
 )

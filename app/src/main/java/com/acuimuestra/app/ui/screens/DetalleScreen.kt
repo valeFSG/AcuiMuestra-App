@@ -83,6 +83,13 @@ fun DetalleScreen(
                         )
                         Dato("Operador", muestra.operadorNombre)
                         Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
+                        muestra.conteoMarcado?.let { marcadas ->
+                            Dato(
+                                "Conteo asistido",
+                                "$marcadas marcas sobre la foto" +
+                                        if (marcadas != muestra.conteo) " · ajustado a mano a ${muestra.conteo}" else ""
+                            )
+                        }
                         Dato("Sincronización", if (muestra.sincronizada) "Enviada al servidor" else "⟳ Pendiente de sincronización")
                     }
                     Seccion("Observaciones") {

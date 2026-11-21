@@ -9,12 +9,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.acuimuestra.app.ui.components.ConteoAsistido
+import com.acuimuestra.app.ui.components.FotoMuestra
 import com.acuimuestra.app.viewmodel.CampoRegistro
 import com.acuimuestra.app.viewmodel.RegistroViewModel
 import com.acuimuestra.app.viewmodel.ReglasRegistro
@@ -27,6 +33,23 @@ fun ConteoScreen(
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val f = estado.formulario
+    var mostrarConteo by remember { mutableStateOf(false) }
+    val foto = f.fotoUri
+
+    if (mostrarConteo && foto != null) {
+        ConteoAsistido(
+            fotoUri = foto,
+            marcas = f.marcas,
+            onAgregar = viewModel::agregarMarca,
+            onDeshacer = viewModel::deshacerMarca,
+            onLimpiar = viewModel::limpiarMarcas,
+            onUsar = {
+                viewModel.usarConteoAsistido()
+                mostrarConteo = false
+            },
+            onCerrar = { mostrarConteo = false }
+        )
+    }
 
     Column(
         Modifier
@@ -40,15 +63,37 @@ fun ConteoScreen(
     ) {
         TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
         Column {
-            Text("Paso 2 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text("Paso 3 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text("Conteo", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
-                "Registra el conteo manual de individuos del tramo",
+                "Marca los individuos sobre la foto o ingresa el conteo a mano",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        LinearProgressIndicator(progress = { 0.5f }, modifier = Modifier.fillMaxWidth())
+        LinearProgressIndicator(progress = { 0.75f }, modifier = Modifier.fillMaxWidth())
+
+        if (foto != null) {
+            Card(
+                onClick = { mostrarConteo = true },
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    FotoMuestra(fotoUri = foto, modifier = Modifier.size(72.dp))
+                    Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                        Text("Conteo asistido", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            if (f.marcas.isEmpty()) "Toca para marcar cada chorito sobre la foto"
+                            else "${f.marcas.size} marcas · toca para seguir marcando",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Text("›", style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+        }
 
         CampoNumero(
             valor = f.conteo,
@@ -57,6 +102,14 @@ fun ConteoScreen(
             error = f.errores[CampoRegistro.CONTEO],
             decimal = false
         )
+        f.conteoMarcado?.let { marcadas ->
+            Text(
+                if (f.conteo.trim() == marcadas.toString()) "Conteo asistido: $marcadas marcas sobre la foto"
+                else "Conteo asistido: $marcadas marcas · ajustado a mano",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         OutlinedTextField(
             value = f.observaciones,
@@ -96,7 +149,7 @@ fun ConteoScreen(
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {
-            Text("Siguiente: fotografía", fontWeight = FontWeight.SemiBold)
+            Text("Siguiente: resumen", fontWeight = FontWeight.SemiBold)
         }
     }
 }

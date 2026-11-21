@@ -36,7 +36,7 @@ fun FotografiaScreen(
     ) {
         TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
         Column {
-            Text("Paso 3 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text("Paso 2 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text("Fotografía", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
                 if (ReglasRegistro.FOTO_OBLIGATORIA) "Adjunta una foto de la muestra"
@@ -45,7 +45,7 @@ fun FotografiaScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        LinearProgressIndicator(progress = { 0.75f }, modifier = Modifier.fillMaxWidth())
+        LinearProgressIndicator(progress = { 0.5f }, modifier = Modifier.fillMaxWidth())
 
         SelectorFoto(
             fotoUri = f.fotoUri,
@@ -54,11 +54,11 @@ fun FotografiaScreen(
         )
 
         Button(
-            onClick = onSiguiente,
+            onClick = { if (viewModel.validarFoto()) onSiguiente() },
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {
-            Text(if (f.fotoUri == null) "Continuar sin foto" else "Siguiente: resumen", fontWeight = FontWeight.SemiBold)
+            Text(if (f.fotoUri == null && !ReglasRegistro.FOTO_OBLIGATORIA) "Continuar sin foto" else "Siguiente: conteo", fontWeight = FontWeight.SemiBold)
         }
     }
 }

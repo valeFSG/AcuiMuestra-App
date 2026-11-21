@@ -85,7 +85,8 @@ class SincronizacionRepository(
             estado = remota.estado,
             comentarioSupervisor = remota.comentarioSupervisor,
             sincronizada = true,
-            usuarioCambio = local?.usuarioCambio
+            usuarioCambio = local?.usuarioCambio,
+            conteoMarcado = remota.conteoMarcado
         )
     }
 
@@ -116,5 +117,6 @@ fun MuestraPendiente.aEnvio() = MuestraEnvio(
     pesoGramos = muestra.pesoGramos,
     fechaHora = muestra.fechaHora,
     horaVerificada = muestra.horaVerificada,
-    fotoNombre = muestra.fotoUri?.substringAfterLast('/')
+    fotoNombre = muestra.fotoUri?.substringAfterLast('/'),
+    conteoMarcado = muestra.conteoMarcado
 )

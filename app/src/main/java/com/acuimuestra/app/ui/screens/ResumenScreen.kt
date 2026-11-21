@@ -66,6 +66,7 @@ fun ResumenScreen(
                 FilaResumen("Fecha y hora", "Se asigna al guardar (hora de red)")
                 FilaResumen("Tramo muestreado", "${f.tramoCm.trim()} cm")
                 FilaResumen("Conteo", "${f.conteo.trim()} individuos")
+                f.conteoMarcado?.let { FilaResumen("Conteo asistido", "$it marcas sobre la foto") }
                 if (f.calibrePromedioMm.isNotBlank()) FilaResumen("Calibre promedio", "${f.calibrePromedioMm.trim()} mm")
                 if (f.pesoGramos.isNotBlank()) FilaResumen("Peso", "${f.pesoGramos.trim()} g")
                 FilaResumen("Fotografía", if (f.fotoUri != null) "Adjunta" else "Sin fotografía")

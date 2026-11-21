@@ -34,6 +34,8 @@ public class Muestra {
 
     private int conteo;
 
+    private Integer conteoMarcado;
+
     @Column(length = 200)
     private String observaciones;
 
@@ -82,6 +84,8 @@ public class Muestra {
     public void setTramoCm(int tramoCm) { this.tramoCm = tramoCm; }
     public int getConteo() { return conteo; }
     public void setConteo(int conteo) { this.conteo = conteo; }
+    public Integer getConteoMarcado() { return conteoMarcado; }
+    public void setConteoMarcado(Integer conteoMarcado) { this.conteoMarcado = conteoMarcado; }
     public String getObservaciones() { return observaciones; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
     public Double getCalibrePromedioMm() { return calibrePromedioMm; }

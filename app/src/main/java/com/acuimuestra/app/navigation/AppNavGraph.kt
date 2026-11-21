@@ -39,21 +39,21 @@ fun AppNavGraph() {
             composable(Ruta.NuevaMuestra.ruta) { entry ->
                 NuevaMuestraScreen(
                     viewModel = entry.registroViewModel(nav),
-                    onSiguiente = { nav.navigate(Ruta.Conteo.ruta) },
+                    onSiguiente = { nav.navigate(Ruta.Fotografia.ruta) },
                     onCancelar = { volverAlInicio() }
                 )
             }
             composable(Ruta.Conteo.ruta) { entry ->
                 ConteoScreen(
                     viewModel = entry.registroViewModel(nav),
-                    onSiguiente = { nav.navigate(Ruta.Fotografia.ruta) },
+                    onSiguiente = { nav.navigate(Ruta.Resumen.ruta) },
                     onVolver = { nav.popBackStack() }
                 )
             }
             composable(Ruta.Fotografia.ruta) { entry ->
                 FotografiaScreen(
                     viewModel = entry.registroViewModel(nav),
-                    onSiguiente = { nav.navigate(Ruta.Resumen.ruta) },
+                    onSiguiente = { nav.navigate(Ruta.Conteo.ruta) },
                     onVolver = { nav.popBackStack() }
                 )
             }

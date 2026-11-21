@@ -52,7 +52,8 @@ data class MuestraEnvio(
     val pesoGramos: Double?,
     val fechaHora: Long,
     val horaVerificada: Boolean,
-    val fotoNombre: String?
+    val fotoNombre: String?,
+    val conteoMarcado: Int? = null
 )
 
 data class MuestraRemota(
@@ -69,7 +70,8 @@ data class MuestraRemota(
     val calibrePromedioMm: Double?,
     val pesoGramos: Double?,
     val estado: EstadoRevision,
-    val comentarioSupervisor: String?
+    val comentarioSupervisor: String?,
+    val conteoMarcado: Int? = null
 )
 
 data class CambioEstadoEnvio(val estado: EstadoRevision, val comentario: String?)

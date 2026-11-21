@@ -126,6 +126,7 @@ public class MuestraService {
     private static void copiarDatos(MuestraRequest req, Muestra m) {
         m.setTramoCm(req.tramoCm());
         m.setConteo(req.conteo());
+        m.setConteoMarcado(req.conteoMarcado());
         m.setObservaciones(vacioANull(req.observaciones()));
         m.setCalibrePromedioMm(req.calibrePromedioMm());
         m.setPesoGramos(req.pesoGramos());
