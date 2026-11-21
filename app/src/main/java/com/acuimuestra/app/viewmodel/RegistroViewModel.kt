@@ -91,6 +91,10 @@ object ReglasRegistro {
     }
 
     fun aDecimal(valor: String): Double? = valor.trim().replace(',', '.').toDoubleOrNull()
+
+    fun densidadPorMetro(conteo: Int?, tramoCm: Int?): Double? =
+        if (conteo == null || tramoCm == null || conteo <= 0 || tramoCm <= 0) null
+        else conteo * 100.0 / tramoCm
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

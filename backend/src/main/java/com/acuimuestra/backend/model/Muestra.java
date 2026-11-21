@@ -99,4 +99,8 @@ public class Muestra {
     public String getComentarioSupervisor() { return comentarioSupervisor; }
     public void setComentarioSupervisor(String comentarioSupervisor) { this.comentarioSupervisor = comentarioSupervisor; }
     public Long getActualizadaEn() { return actualizadaEn; }
+
+    public Double getDensidadPorMetro() {
+        return tramoCm > 0 ? Math.round(conteo * 1000.0 / tramoCm) / 10.0 : null;
+    }
 }

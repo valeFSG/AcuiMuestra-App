@@ -307,4 +307,13 @@ class RegistroViewModelTest {
         assertNull(ReglasRegistro.aDecimal(""))
         assertNull(ReglasRegistro.decimalOpcional("", 10.0, "g"))
     }
+
+    @Test
+    fun densidad_esConteoPorMetroDeTramo() {
+        assertEquals(616.67, ReglasRegistro.densidadPorMetro(185, 30)!!, 0.01)
+        assertEquals(500.0, ReglasRegistro.densidadPorMetro(300, 60)!!, 0.0)
+        assertNull(ReglasRegistro.densidadPorMetro(185, 0))
+        assertNull(ReglasRegistro.densidadPorMetro(null, 30))
+        assertNull(ReglasRegistro.densidadPorMetro(0, 30))
+    }
 }
