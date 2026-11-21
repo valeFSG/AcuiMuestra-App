@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -7,6 +8,12 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kover)
 }
+
+val propiedadesLocales = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
+}
+val urlApi: String = propiedadesLocales.getProperty("api.url") ?: "http://10.0.2.2:8080/"
 
 android {
     namespace = "com.acuimuestra.app"
@@ -19,6 +26,7 @@ android {
         versionCode = 2
         versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_URL", "\"$urlApi\"")
     }
 
     buildTypes {

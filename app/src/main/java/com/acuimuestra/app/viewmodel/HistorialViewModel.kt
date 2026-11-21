@@ -10,6 +10,7 @@ import com.acuimuestra.app.data.model.MuestraResumen
 import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.FiltroMuestras
 import com.acuimuestra.app.data.repository.MuestraRepository
+import com.acuimuestra.app.sync.ControlSincronizacion
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 
@@ -22,10 +23,17 @@ data class HistorialUiState(
     val todas: List<MuestraResumen> = emptyList()
 )
 
+data class EstadoSincronizacion(
+    val enLinea: Boolean = true,
+    val sincronizando: Boolean = false,
+    val pendientes: Int = 0
+)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistorialViewModel(
     muestraRepository: MuestraRepository,
-    catalogoRepository: CatalogoRepository
+    catalogoRepository: CatalogoRepository,
+    private val control: ControlSincronizacion
 ) : ViewModel() {
 
     private val filtro = MutableStateFlow(FiltroMuestras())
@@ -48,6 +56,16 @@ class HistorialViewModel(
         )
 
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistorialUiState())
+    val sincronizacion: StateFlow<EstadoSincronizacion> = combine(
+        control.enLinea,
+        control.sincronizando,
+        muestraRepository.pendientes()
+    ) { enLinea, sincronizando, pendientes ->
+        EstadoSincronizacion(enLinea, sincronizando, pendientes)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EstadoSincronizacion())
+
+    fun sincronizar() = control.sincronizar()
+
     fun filtrarCentro(centroId: Long?) = filtro.update { it.copy(centroId = centroId) }
 
     fun filtrarEstado(estado: EstadoRevision?) = filtro.update { it.copy(estado = estado) }
@@ -69,7 +87,7 @@ class HistorialViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val contenedor = contenedor()
-                HistorialViewModel(contenedor.muestraRepository, contenedor.catalogoRepository)
+                HistorialViewModel(contenedor.muestraRepository, contenedor.catalogoRepository, contenedor.sincronizador)
             }
         }
     }

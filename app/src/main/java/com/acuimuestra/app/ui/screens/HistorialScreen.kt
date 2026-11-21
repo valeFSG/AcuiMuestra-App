@@ -61,6 +61,7 @@ import com.acuimuestra.app.ui.etiqueta
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.ui.theme.colores
+import com.acuimuestra.app.viewmodel.EstadoSincronizacion
 import com.acuimuestra.app.viewmodel.HistorialViewModel
 
 @Composable
@@ -71,6 +72,7 @@ fun HistorialScreen(
     viewModel: HistorialViewModel = viewModel(factory = HistorialViewModel.Factory)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val sincronizacion by viewModel.sincronizacion.collectAsStateWithLifecycle()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
@@ -136,6 +138,7 @@ fun HistorialScreen(
         }
 
         Spacer(Modifier.height(12.dp))
+        BarraSincronizacion(sincronizacion, onSincronizar = viewModel::sincronizar)
         FilaFiltros(
             opciones = listOf<Pair<Long?, String>>(null to "Todos los centros") + estado.centros.map { it.id to it.nombre },
             seleccionado = estado.filtro.centroId,
@@ -290,6 +293,45 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
+                if (!muestra.sincronizada) {
+                    Text(
+                        "⟳ Pendiente de sincronización",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = ColorPendiente
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val ColorPendiente = Color(0xFFB26B00)
+
+@Composable
+private fun BarraSincronizacion(estado: EstadoSincronizacion, onSincronizar: () -> Unit) {
+    val (fondo, texto) = when {
+        !estado.enLinea -> Color(0xFFFFF4E0) to "Modo sin conexión · ${estado.pendientes} pendiente(s). Se enviarán al volver internet."
+        estado.sincronizando -> MaterialTheme.colorScheme.primaryContainer to "Sincronizando con el servidor…"
+        estado.pendientes > 0 -> Color(0xFFFFF4E0) to "${estado.pendientes} muestra(s) pendiente(s) de sincronización"
+        else -> MaterialTheme.colorScheme.secondaryContainer to "✓ Todo sincronizado con el servidor"
+    }
+    Surface(
+        color = fondo,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp)
+    ) {
+        Row(
+            Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (estado.sincronizando) {
+                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(texto, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+            TextButton(onClick = onSincronizar, enabled = estado.enLinea && !estado.sincronizando) {
+                Text("Sincronizar")
             }
         }
     }

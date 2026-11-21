@@ -33,12 +33,13 @@ object DatosPrueba {
             listOf(
                 EstadoRevision.PENDIENTE,
                 EstadoRevision.OBSERVADO,
-                EstadoRevision.CORREGIDO,
-                EstadoRevision.VALIDADO
+                EstadoRevision.VALIDADO,
+                EstadoRevision.DESCARTADO
             ).forEachIndexed { i, estado ->
                 val (centroId, trenId, lineaId) = ubicaciones[i * 3]
                 db.muestraDao().insertar(
                     Muestra(
+                        uuid = "semilla-${i + 1}",
                         centroId = centroId,
                         trenId = trenId,
                         lineaId = lineaId,
@@ -48,7 +49,11 @@ object DatosPrueba {
                         conteo = 150 + i * 12,
                         observaciones = "Muestra de prueba ${i + 1}",
                         estado = estado,
-                        comentarioSupervisor = if(estado == EstadoRevision.OBSERVADO) "Conteo dudoso, repetir el tramo" else null
+                        comentarioSupervisor = when (estado) {
+                            EstadoRevision.OBSERVADO -> "Conteo dudoso, repetir el tramo"
+                            EstadoRevision.DESCARTADO -> "Muestra duplicada por error de registro"
+                            else -> null
+                        }
 
                     )
                 )

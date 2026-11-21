@@ -8,5 +8,6 @@ data class MuestraResumen(
     val centroNombre: String,
     val trenNombre: String,
     val lineaNombre: String,
-    val operadorNombre: String
+    val operadorNombre: String,
+    val sincronizada: Boolean
 )

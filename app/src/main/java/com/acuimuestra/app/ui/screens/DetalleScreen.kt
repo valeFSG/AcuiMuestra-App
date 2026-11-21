@@ -83,6 +83,7 @@ fun DetalleScreen(
                         )
                         Dato("Operador", muestra.operadorNombre)
                         Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
+                        Dato("Sincronización", if (muestra.sincronizada) "Enviada al servidor" else "⟳ Pendiente de sincronización")
                     }
                     Seccion("Observaciones") {
                         Text(
