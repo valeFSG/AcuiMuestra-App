@@ -9,5 +9,6 @@ data class MuestraResumen(
     val trenNombre: String,
     val lineaNombre: String,
     val operadorNombre: String,
-    val sincronizada: Boolean
+    val sincronizada: Boolean,
+    val tramoCm: Int = 0
 )

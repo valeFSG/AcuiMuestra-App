@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.acuimuestra.app.ui.comoFechaHora
+import com.acuimuestra.app.ui.densidadTexto
 import com.acuimuestra.app.ui.components.FotoMuestra
 import com.acuimuestra.app.viewmodel.RegistroViewModel
 
@@ -66,6 +67,7 @@ fun ResumenScreen(
                 FilaResumen("Fecha y hora", "Se asigna al guardar (hora de red)")
                 FilaResumen("Tramo muestreado", "${f.tramoCm.trim()} cm")
                 FilaResumen("Conteo", "${f.conteo.trim()} individuos")
+                FilaResumen("Densidad", densidadTexto(f.conteo.trim().toIntOrNull(), f.tramoCm.trim().toIntOrNull()))
                 f.conteoMarcado?.let { FilaResumen("Conteo asistido", "$it marcas sobre la foto") }
                 if (f.calibrePromedioMm.isNotBlank()) FilaResumen("Calibre promedio", "${f.calibrePromedioMm.trim()} mm")
                 if (f.pesoGramos.isNotBlank()) FilaResumen("Peso", "${f.pesoGramos.trim()} g")

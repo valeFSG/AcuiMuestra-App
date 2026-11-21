@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraDetalle
 import com.acuimuestra.app.ui.comoFechaHora
+import com.acuimuestra.app.ui.densidadTexto
 import com.acuimuestra.app.ui.components.FotoMuestra
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
@@ -177,6 +178,14 @@ private fun Metricas(muestra: MuestraDetalle) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Metrica("Conteo", "${muestra.conteo}", "individuos", destacada = true, modifier = Modifier.weight(1f))
             Metrica("Tramo", "${muestra.tramoCm}", "cm", modifier = Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Metrica(
+                "Densidad",
+                densidadTexto(muestra.conteo, muestra.tramoCm).removeSuffix(" ind/m"),
+                "ind/m",
+                modifier = Modifier.weight(1f)
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Metrica("Calibre", muestra.calibrePromedioMm?.toString() ?: "—", "mm", modifier = Modifier.weight(1f))

@@ -57,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraResumen
 import com.acuimuestra.app.ui.comoFechaHora
+import com.acuimuestra.app.ui.densidadTexto
 import com.acuimuestra.app.ui.etiqueta
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
@@ -288,7 +289,7 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "${muestra.conteo} individuos",
+                    "${muestra.conteo} individuos · ${densidadTexto(muestra.conteo, muestra.tramoCm)}",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

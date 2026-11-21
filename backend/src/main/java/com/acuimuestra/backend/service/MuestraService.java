@@ -115,7 +115,12 @@ public class MuestraService {
         Map<String, Long> porCentro = new TreeMap<>(todas.stream()
                 .collect(Collectors.groupingBy(Muestra::getCentro, Collectors.counting())));
         long individuos = todas.stream().mapToLong(Muestra::getConteo).sum();
-        return new ResumenResponse(todas.size(), individuos, porEstado, porCentro);
+        Map<String, Double> densidad = new TreeMap<>();
+        todas.stream()
+                .filter(m -> m.getDensidadPorMetro() != null)
+                .collect(Collectors.groupingBy(Muestra::getCentro, Collectors.averagingDouble(Muestra::getDensidadPorMetro)))
+                .forEach((centro, promedio) -> densidad.put(centro, Math.round(promedio * 10.0) / 10.0));
+        return new ResumenResponse(todas.size(), individuos, porEstado, porCentro, densidad);
     }
 
     private Muestra buscar(String id) {

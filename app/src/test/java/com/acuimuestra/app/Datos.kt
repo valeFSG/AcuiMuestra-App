@@ -69,6 +69,7 @@ object Datos {
         trenNombre = "Tren 1",
         lineaNombre = "Línea 1",
         operadorNombre = "Operador",
-        sincronizada = true
+        sincronizada = true,
+        tramoCm = 20
     )
 }

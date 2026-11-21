@@ -8,14 +8,15 @@ import com.acuimuestra.app.data.model.MuestraResumen
 import java.io.File
 
 object ExportadorCsv {
-    private val encabezado = listOf("id", "fecha_hora", "centro", "tren", "linea", "operador", "conteo", "estado")
+    private val encabezado = listOf("id", "fecha_hora", "centro", "tren", "linea", "operador", "conteo", "tramo_cm", "densidad_ind_m", "estado")
 
     fun generar(muestras: List<MuestraResumen>): String = buildString {
         appendLine(encabezado.joinToString(";"))
         muestras.forEach { m ->
             val fila = listOf(
                 m.id, m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre,
-                m.lineaNombre, m.operadorNombre, m.conteo, m.estado.etiqueta()
+                m.lineaNombre, m.operadorNombre, m.conteo, m.tramoCm,
+                densidadTexto(m.conteo, m.tramoCm).removeSuffix(" ind/m"), m.estado.etiqueta()
             )
             appendLine(fila.joinToString(";") { escapar(it.toString()) })
         }
@@ -33,6 +34,7 @@ fun MuestraDetalle.resumenTexto(): String = buildString {
     appendLine("Operador: $operadorNombre")
     appendLine("Tramo: $tramoCm cm")
     appendLine("Conteo: $conteo individuos")
+    appendLine("Densidad: ${densidadTexto(conteo, tramoCm)}")
     calibrePromedioMm?.let { appendLine("Calibre promedio: $it mm") }
     pesoGramos?.let { appendLine("Peso: $it g") }
     appendLine("Observaciones: ${observaciones.ifBlank { "Sin observaciones" }}")
