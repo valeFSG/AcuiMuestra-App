@@ -30,7 +30,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -107,7 +110,9 @@ fun HistorialScreen(
                     )
                 }
                 TextButton(onClick = onDashboard, enabled = estado.todas.isNotEmpty()) {
-                    Text("📊 Panel", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Icon(Icons.Outlined.BarChart, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Panel", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
                 OutlinedButton(
                     onClick = onExportar,

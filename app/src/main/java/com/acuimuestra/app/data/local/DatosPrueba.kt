@@ -11,7 +11,8 @@ object DatosPrueba {
             db.usuarioDao().insertarTodos(
                 listOf(
                     Usuario(id = 1, usuario = "operador", clave = "1234", nombreVisible = "Operador", rol = Rol.OPERADOR),
-                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Supervisor", rol = Rol.SUPERVISOR)
+                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Supervisor", rol = Rol.SUPERVISOR),
+                    Usuario(id = 3, usuario = "analista", clave = "1234", nombreVisible = "Analista", rol = Rol.ANALISTA)
                 )
             )
 
