@@ -1,3 +1,3 @@
 package com.acuimuestra.app.data.model
 
-enum class Rol { OPERADOR, SUPERVISOR }
+enum class Rol { OPERADOR, SUPERVISOR, ANALISTA }
