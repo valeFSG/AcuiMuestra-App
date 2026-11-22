@@ -1,5 +1,12 @@
 package com.acuimuestra.app.ui.screens
 
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,7 +100,7 @@ fun HistorialScreen(
                 contentPadding = PaddingValues(0.dp),
                 modifier = Modifier.offset(x = (-4).dp)
             ) {
-                Text("‹ Inicio", color = Color.White, fontWeight = FontWeight.SemiBold)
+                EtiquetaVolver("Inicio", Color.White, FontWeight.SemiBold)
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -123,7 +130,7 @@ fun HistorialScreen(
                     ),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Exportar CSV")
+                    Text("Exportar")
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -131,7 +138,7 @@ fun HistorialScreen(
                 value = estado.busqueda,
                 onValueChange = viewModel::onBusquedaChange,
                 placeholder = { Text("Buscar por centro, línea, operador o N°") },
-                leadingIcon = { Text("⌕", fontSize = 22.sp) },
+                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                 trailingIcon = if (estado.busqueda.isNotEmpty()) {
                     { TextButton(onClick = { viewModel.onBusquedaChange("") }) { Text("Limpiar") } }
                 } else null,
@@ -216,14 +223,16 @@ private fun <T> FilaFiltros(
 
         if (hayMasIzquierda) {
             IndicadorMas(
-                simbolo = "‹",
+                icono = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                alineacion = Alignment.CenterStart,
                 degradado = Brush.horizontalGradient(listOf(fondo, fondo.copy(alpha = 0f))),
                 modifier = Modifier.align(Alignment.CenterStart)
             )
         }
         if (hayMasDerecha) {
             IndicadorMas(
-                simbolo = "›",
+                icono = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                alineacion = Alignment.CenterEnd,
                 degradado = Brush.horizontalGradient(listOf(fondo.copy(alpha = 0f), fondo, fondo)),
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
@@ -232,17 +241,16 @@ private fun <T> FilaFiltros(
 }
 
 @Composable
-private fun IndicadorMas(simbolo: String, degradado: Brush, modifier: Modifier) {
+private fun IndicadorMas(icono: ImageVector, degradado: Brush, alineacion: Alignment, modifier: Modifier) {
     Box(
         modifier.width(64.dp).fillMaxHeight().background(degradado),
-        contentAlignment = if (simbolo == "›") Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = alineacion
     ) {
-        Text(
-            simbolo,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 8.dp)
+        Icon(
+            icono,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 8.dp).size(28.dp)
         )
     }
 }
@@ -258,7 +266,7 @@ private fun SinResultados() {
             Modifier.size(96.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            Text("⌕", fontSize = 48.sp, color = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Outlined.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp))
         }
         Spacer(Modifier.height(16.dp))
         Text("Sin muestras", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -304,12 +312,21 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.primary
                 )
                 if (!muestra.sincronizada) {
-                    Text(
-                        "⟳ Pendiente de sincronización",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Outlined.Sync,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Pendiente de sincronización",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
                 }
             }
         }
@@ -322,7 +339,7 @@ private fun BarraSincronizacion(estado: EstadoSincronizacion, onSincronizar: () 
         !estado.enLinea -> MaterialTheme.colorScheme.tertiaryContainer to "Modo sin conexión · ${estado.pendientes} pendiente(s). Se enviarán al volver internet."
         estado.sincronizando -> MaterialTheme.colorScheme.primaryContainer to "Sincronizando con el servidor…"
         estado.pendientes > 0 -> MaterialTheme.colorScheme.tertiaryContainer to "${estado.pendientes} muestra(s) pendiente(s) de sincronización"
-        else -> MaterialTheme.colorScheme.secondaryContainer to "✓ Todo sincronizado con el servidor"
+        else -> MaterialTheme.colorScheme.secondaryContainer to "Todo sincronizado con el servidor"
     }
     Surface(
         color = fondo,
@@ -335,6 +352,9 @@ private fun BarraSincronizacion(estado: EstadoSincronizacion, onSincronizar: () 
         ) {
             if (estado.sincronizando) {
                 CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(10.dp))
+            } else if (estado.enLinea && estado.pendientes == 0) {
+                Icon(Icons.Outlined.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(10.dp))
             }
             Text(texto, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))

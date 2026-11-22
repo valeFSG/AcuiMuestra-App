@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -54,7 +55,7 @@ fun ExportarScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)
         ) {
             TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) {
-                Text("‹ Historial", color = Color.White, fontWeight = FontWeight.SemiBold)
+                EtiquetaVolver("Historial", Color.White, FontWeight.SemiBold)
             }
             Text("Exportar muestras", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
             Text("Elige qué muestras incluir en el archivo CSV o PDF", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.85f))

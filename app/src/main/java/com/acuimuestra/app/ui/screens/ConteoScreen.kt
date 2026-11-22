@@ -1,5 +1,8 @@
 package com.acuimuestra.app.ui.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -61,7 +64,7 @@ fun ConteoScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
+        TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { EtiquetaVolver() }
         Column {
             Text("Paso 3 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text("Conteo", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -90,7 +93,7 @@ fun ConteoScreen(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
-                    Text("›", style = MaterialTheme.typography.headlineSmall)
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null)
                 }
             }
         }

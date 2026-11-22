@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -39,7 +40,7 @@ fun ResumenScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextButton(onClick = onVolver, enabled = !f.guardando, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
+        TextButton(onClick = onVolver, enabled = !f.guardando, contentPadding = PaddingValues(0.dp)) { EtiquetaVolver() }
         Column {
             Text("Paso 4 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text("Resumen", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)

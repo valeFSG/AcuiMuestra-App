@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -60,7 +61,7 @@ fun DetalleScreen(
             ) { CircularProgressIndicator() }
 
             muestra == null -> Column(Modifier.statusBarsPadding().padding(24.dp)) {
-                TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { Text("‹ Volver") }
+                TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp)) { EtiquetaVolver() }
                 Text("No se encontró la muestra", style = MaterialTheme.typography.bodyLarge)
             }
 
@@ -80,7 +81,7 @@ fun DetalleScreen(
                         Dato(
                             "Fecha y hora",
                             muestra.fechaHora.comoFechaHora() +
-                                    if (muestra.horaVerificada) " · hora de red" else " · ⚠ no verificada (sin conexión)"
+                                    if (muestra.horaVerificada) " · hora de red" else " · no verificada (sin conexión)"
                         )
                         Dato("Operador", muestra.operadorNombre)
                         Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
@@ -91,7 +92,7 @@ fun DetalleScreen(
                                         if (marcadas != muestra.conteo) " · ajustado a mano a ${muestra.conteo}" else ""
                             )
                         }
-                        Dato("Sincronización", if (muestra.sincronizada) "Enviada al servidor" else "⟳ Pendiente de sincronización")
+                        Dato("Sincronización", if (muestra.sincronizada) "Enviada al servidor" else "Pendiente de sincronización")
                     }
                     Seccion("Observaciones") {
                         Text(
@@ -152,7 +153,7 @@ private fun Encabezado(muestra: MuestraDetalle, onVolver: () -> Unit) {
             onClick = onVolver,
             modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(8.dp)
         ) {
-            Text("‹ Volver", color = Color.White, fontWeight = FontWeight.SemiBold)
+            EtiquetaVolver(color = Color.White, fontWeight = FontWeight.SemiBold)
         }
         Column(Modifier.align(Alignment.BottomStart).padding(20.dp)) {
             EtiquetaEstado(muestra.estado)
