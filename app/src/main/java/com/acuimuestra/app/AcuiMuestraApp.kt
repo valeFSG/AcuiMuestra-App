@@ -1,6 +1,10 @@
 package com.acuimuestra.app
 
 import android.app.Application
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.acuimuestra.app.data.local.AcuiMuestraDatabase
 import com.acuimuestra.app.data.local.DatosPrueba
 import com.acuimuestra.app.data.remote.ApiCliente
@@ -10,6 +14,7 @@ import com.acuimuestra.app.data.remote.RelojRed
 import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.MarinaRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
+import com.acuimuestra.app.data.repository.PreferenciasRepository
 import com.acuimuestra.app.data.repository.SincronizacionRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
 import com.acuimuestra.app.sync.Sincronizador
@@ -18,7 +23,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
+private val Context.preferencias: DataStore<Preferences> by preferencesDataStore(name = "preferencias")
+
 class AppContainer(app: Application, db: AcuiMuestraDatabase) {
+    val preferenciasRepository = PreferenciasRepository(app.preferencias)
     val usuarioRepository = UsuarioRepository(db.usuarioDao())
     val catalogoRepository = CatalogoRepository(db.catalogoDao())
     val sincronizador = Sincronizador(app, RedMonitor(app))
