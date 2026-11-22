@@ -57,7 +57,7 @@ fun ExportarScreen(
                 Text("‹ Historial", color = Color.White, fontWeight = FontWeight.SemiBold)
             }
             Text("Exportar muestras", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
-            Text("Elige qué muestras incluir en el archivo CSV", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.85f))
+            Text("Elige qué muestras incluir en el archivo CSV o PDF", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.85f))
         }
 
         LazyColumn(
@@ -126,7 +126,7 @@ fun ExportarScreen(
         Surface(shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surfaceContainerLowest) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(20.dp)) {
                 Text(
-                    "Columnas: id, fecha, centro, tren, línea, operador, conteo, estado",
+                    "Columnas: id, fecha, centro, tren, línea, operador, conteo, tramo, densidad, estado",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
