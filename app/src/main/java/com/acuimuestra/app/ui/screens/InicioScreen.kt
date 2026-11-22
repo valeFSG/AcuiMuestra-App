@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Water
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,7 +54,6 @@ fun InicioScreen(
     }
 
     val actual = usuario ?: return
-    val esSupervisor = actual.rol == Rol.SUPERVISOR
 
     Column(
         Modifier
@@ -92,7 +93,11 @@ fun InicioScreen(
                 Spacer(Modifier.height(12.dp))
                 Surface(color = Color.White.copy(alpha = 0.18f), shape = CircleShape) {
                     Text(
-                        if (esSupervisor) "Supervisor técnico" else "Operador de muestreo",
+                        when (actual.rol) {
+                            Rol.SUPERVISOR -> "Supervisor técnico"
+                            Rol.ANALISTA -> "Analista de datos"
+                            Rol.OPERADOR -> "Operador de muestreo"
+                        },
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
@@ -109,8 +114,8 @@ fun InicioScreen(
 
             Text("¿Qué quieres hacer hoy?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
-            if (esSupervisor) {
-                CardAccion(
+            when (actual.rol) {
+                Rol.SUPERVISOR -> CardAccion(
                     titulo = "Revisar muestras",
                     descripcion = "Valida, observa o descarta los registros",
                     simbolo = "✓",
@@ -118,23 +123,32 @@ fun InicioScreen(
                     onClick = onHistorial,
                     imagen = R.drawable.inicio_revisar
                 )
-            } else {
-                CardAccion(
-                    titulo = "Nueva muestra",
-                    descripcion = "Registra una muestra de chorito en terreno",
-                    simbolo = "+",
-                    colores = listOf(AzulProfundo, AzulPrincipal),
-                    onClick = onNuevaMuestra,
-                    imagen = R.drawable.inicio_nueva_muestra
-                )
-                CardAccion(
-                    titulo = "Historial",
-                    descripcion = "Consulta y filtra las muestras registradas",
+                Rol.ANALISTA -> CardAccion(
+                    titulo = "Consultar muestras",
+                    descripcion = "Revisa el historial, el panel y exporta reportes",
                     simbolo = "≡",
                     colores = listOf(VerdeOscuro, VerdeSecundario),
                     onClick = onHistorial,
                     imagen = R.drawable.inicio_historial
                 )
+                Rol.OPERADOR -> {
+                    CardAccion(
+                        titulo = "Nueva muestra",
+                        descripcion = "Registra una muestra de chorito en terreno",
+                        simbolo = "+",
+                        colores = listOf(AzulProfundo, AzulPrincipal),
+                        onClick = onNuevaMuestra,
+                        imagen = R.drawable.inicio_nueva_muestra
+                    )
+                    CardAccion(
+                        titulo = "Historial",
+                        descripcion = "Consulta y filtra las muestras registradas",
+                        simbolo = "≡",
+                        colores = listOf(VerdeOscuro, VerdeSecundario),
+                        onClick = onHistorial,
+                        imagen = R.drawable.inicio_historial
+                    )
+                }
             }
         }
     }
@@ -199,7 +213,7 @@ private fun TarjetaMarina(estado: EstadoMarina, onReintentar: () -> Unit) {
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🌊", fontSize = 20.sp)
+                Icon(Icons.Outlined.Water, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(8.dp))
                 Text(
                     "Condiciones del mar",
