@@ -23,7 +23,8 @@ object ExportadorPdf {
     private const val ANCHO = 595
     private const val ALTO = 842
     private const val MARGEN = 40f
-    private const val ALTO_FILA = 22f
+    private const val ALTO_ENCABEZADO = 22f
+    private const val ALTO_FILA = 36f
     private const val INICIO_TABLA = 108f
 
     private val AZUL = 0xFF0277BD.toInt()
@@ -34,14 +35,15 @@ object ExportadorPdf {
     private val BLANCO = 0xFFFFFFFF.toInt()
 
     private val columnas = listOf(
-        "N°" to 27f,
-        "Fecha y hora" to 88f,
+        "N°" to 25f,
+        "Fecha y hora" to 82f,
         "Centro" to 110f,
-        "Tren · Línea" to 80f,
-        "Operador" to 76f,
-        "Conteo" to 40f,
-        "Tramo" to 42f,
-        "Densidad" to 52f
+        "Tren" to 45f,
+        "Línea" to 50f,
+        "Tramo" to 40f,
+        "Conteo" to 42f,
+        "Densidad" to 58f,
+        "Estado" to 63f
     )
 
     fun resumen(muestras: List<MuestraResumen>): ResumenPdf {
@@ -56,10 +58,11 @@ object ExportadorPdf {
         val subtitulo = pincel(10f, GRIS)
         val encabezado = pincel(8.5f, BLANCO, negrita = true)
         val texto = pincel(8.5f, TEXTO)
+        val nota = pincel(7.5f, GRIS)
         val fondoEncabezado = Paint().apply { color = AZUL }
         val fondoAlterno = Paint().apply { color = FILA_ALTERNA }
 
-        val filasPorPagina = ((ALTO - MARGEN - INICIO_TABLA - ALTO_FILA) / ALTO_FILA).toInt()
+        val filasPorPagina = ((ALTO - MARGEN - INICIO_TABLA - ALTO_ENCABEZADO) / ALTO_FILA).toInt()
         val paginas = datos.muestras.chunked(filasPorPagina).ifEmpty { listOf(emptyList()) }
         val documento = PdfDocument()
 
@@ -74,21 +77,23 @@ object ExportadorPdf {
             )
 
             var y = INICIO_TABLA
-            lienzo.drawRect(MARGEN, y, ANCHO - MARGEN, y + ALTO_FILA, fondoEncabezado)
+            lienzo.drawRect(MARGEN, y, ANCHO - MARGEN, y + ALTO_ENCABEZADO, fondoEncabezado)
             dibujarFila(lienzo, columnas.map { it.first }, y, encabezado)
-            y += ALTO_FILA
+            y += ALTO_ENCABEZADO
 
             filas.forEachIndexed { n, m ->
                 if (n % 2 == 1) lienzo.drawRect(MARGEN, y, ANCHO - MARGEN, y + ALTO_FILA, fondoAlterno)
                 dibujarFila(
                     lienzo,
                     listOf(
-                        "#${m.id}", m.fechaHora.comoFechaHora(), m.centroNombre,
-                        "${m.trenNombre} · ${m.lineaNombre}", m.operadorNombre,
-                        "${m.conteo}", "${m.tramoCm} cm", densidadTexto(m.conteo, m.tramoCm)
+                        "#${m.id}", m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre, m.lineaNombre,
+                        "${m.tramoCm} cm", "${m.conteo}", densidadTexto(m.conteo, m.tramoCm), m.estado.etiqueta()
                     ),
                     y, texto
                 )
+                val observacion = "Observaciones: ${m.observaciones.ifBlank { "Sin observaciones" }}"
+                val corta = TextUtils.ellipsize(observacion, nota, ANCHO - 2 * MARGEN - 12f, TextUtils.TruncateAt.END)
+                lienzo.drawText(corta.toString(), MARGEN + 6f, y + 29f, nota)
                 y += ALTO_FILA
             }
             if (filas.isEmpty()) lienzo.drawText("No hay muestras validadas en la selección.", MARGEN, y + 16f, subtitulo)

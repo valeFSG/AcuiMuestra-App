@@ -10,5 +10,6 @@ data class MuestraResumen(
     val lineaNombre: String,
     val operadorNombre: String,
     val sincronizada: Boolean,
-    val tramoCm: Int = 0
+    val tramoCm: Int = 0,
+    val observaciones: String = ""
 )
