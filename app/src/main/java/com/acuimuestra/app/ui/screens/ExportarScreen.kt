@@ -24,8 +24,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraResumen
 import com.acuimuestra.app.ui.ExportadorCsv
+import com.acuimuestra.app.ui.ExportadorPdf
 import com.acuimuestra.app.ui.comoFechaHora
 import com.acuimuestra.app.ui.compartirCsv
+import com.acuimuestra.app.ui.compartirPdf
 import com.acuimuestra.app.ui.etiqueta
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
@@ -40,6 +42,7 @@ fun ExportarScreen(
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val seleccionadas = estado.seleccionadas
+    val validadas = seleccionadas.count { it.estado == EstadoRevision.VALIDADO }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
@@ -137,6 +140,19 @@ fun ExportarScreen(
                     Text(
                         if (seleccionadas.isEmpty()) "Selecciona al menos una muestra"
                         else "Exportar ${seleccionadas.size} muestra(s) en CSV",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { compartirPdf(context, ExportadorPdf.generar(context, seleccionadas)) },
+                    enabled = validadas > 0,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(52.dp)
+                ) {
+                    Text(
+                        if (validadas == 0) "PDF: no hay muestras validadas"
+                        else "Exportar $validadas validada(s) en PDF",
                         fontWeight = FontWeight.SemiBold
                     )
                 }
