@@ -77,11 +77,18 @@ data class MuestraRemota(
 data class CambioEstadoEnvio(val estado: EstadoRevision, val comentario: String?)
 
 object ApiCliente {
-    fun crear(urlBase: String = BuildConfig.API_URL): AcuiMuestraApi {
+    fun crear(urlBase: String = BuildConfig.API_URL, claveApi: String = BuildConfig.API_KEY): AcuiMuestraApi {
         val registro = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
         val http = OkHttpClient.Builder()
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .addInterceptor { cadena ->
+                val peticion = cadena.request()
+                cadena.proceed(
+                    if (claveApi.isBlank()) peticion
+                    else peticion.newBuilder().header("X-Api-Key", claveApi).build()
+                )
+            }
             .addInterceptor(registro)
             .build()
         return Retrofit.Builder()
