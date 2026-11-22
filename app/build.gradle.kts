@@ -14,6 +14,7 @@ val propiedadesLocales = Properties().apply {
     if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 val urlApi: String = propiedadesLocales.getProperty("api.url") ?: "http://10.0.2.2:8080/"
+val archivoFirma: String? = propiedadesLocales.getProperty("release.storeFile")
 
 android {
     namespace = "com.acuimuestra.app"
@@ -29,8 +30,20 @@ android {
         buildConfigField("String", "API_URL", "\"$urlApi\"")
     }
 
+    signingConfigs {
+        create("release") {
+            if (archivoFirma != null) {
+                storeFile = file(archivoFirma)
+                storePassword = propiedadesLocales.getProperty("release.storePassword")
+                keyAlias = propiedadesLocales.getProperty("release.keyAlias")
+                keyPassword = propiedadesLocales.getProperty("release.keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (archivoFirma != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
