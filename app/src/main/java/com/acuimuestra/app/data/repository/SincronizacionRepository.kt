@@ -1,5 +1,6 @@
 package com.acuimuestra.app.data.repository
 
+import com.acuimuestra.app.data.local.AlmacenFotos
 import com.acuimuestra.app.data.local.MuestraDao
 import com.acuimuestra.app.data.local.UsuarioDao
 import com.acuimuestra.app.data.model.EstadoRevision
@@ -9,7 +10,10 @@ import com.acuimuestra.app.data.remote.AcuiMuestraApi
 import com.acuimuestra.app.data.remote.CambioEstadoEnvio
 import com.acuimuestra.app.data.remote.MuestraEnvio
 import com.acuimuestra.app.data.remote.MuestraRemota
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
+import java.io.IOException
 
 data class ResultadoSincronizacion(val enviadas: Int, val recibidas: Int)
 
@@ -17,6 +21,7 @@ class SincronizacionRepository(
     private val muestraDao: MuestraDao,
     private val usuarioDao: UsuarioDao,
     private val api: AcuiMuestraApi,
+    private val fotos: AlmacenFotos,
     private val usuarioConsulta: () -> String
 ) {
 
@@ -28,6 +33,7 @@ class SincronizacionRepository(
             val m = pendiente.muestra
             val datos = pendiente.aEnvio()
             if (!aceptadaPorServidor { api.crear(pendiente.operadorUsuario, datos) }) continue
+            m.fotoUri?.let { subirFoto(pendiente.operadorUsuario, m.uuid, it) }
             when (m.estado) {
                 EstadoRevision.OBSERVADO, EstadoRevision.VALIDADO, EstadoRevision.DESCARTADO ->
                     aceptadaPorServidor {
@@ -77,7 +83,7 @@ class SincronizacionRepository(
             tramoCm = remota.tramoCm,
             conteo = remota.conteo,
             observaciones = remota.observaciones.orEmpty(),
-            fotoUri = local?.fotoUri,
+            fotoUri = local?.fotoUri ?: descargarFoto(remota),
             calibrePromedioMm = remota.calibrePromedioMm,
             calibreMinMm = local?.calibreMinMm,
             calibreMaxMm = local?.calibreMaxMm,
@@ -88,6 +94,23 @@ class SincronizacionRepository(
             usuarioCambio = local?.usuarioCambio,
             conteoMarcado = remota.conteoMarcado
         )
+    }
+
+    private suspend fun subirFoto(usuario: String, uuid: String, uri: String) {
+        val datos = fotos.leerParaEnviar(uri) ?: return
+        aceptadaPorServidor { api.subirFoto(usuario, uuid, datos.toRequestBody(JPEG)) }
+    }
+
+    private suspend fun descargarFoto(remota: MuestraRemota): String? {
+        if (!remota.tieneFoto) return null
+        val datos = try {
+            api.descargarFoto(usuarioConsulta(), remota.id).bytes()
+        } catch (e: HttpException) {
+            return null
+        } catch (e: IOException) {
+            return null
+        }
+        return fotos.guardarRecibida(remota.id, datos)
     }
 
     private suspend fun aceptadaPorServidor(llamada: suspend () -> Unit): Boolean =
@@ -102,6 +125,7 @@ class SincronizacionRepository(
     companion object {
         const val SUPERVISOR_POR_DEFECTO = "supervisor"
         private const val CONFLICTO = 409
+        private val JPEG = "image/jpeg".toMediaType()
     }
 }
 

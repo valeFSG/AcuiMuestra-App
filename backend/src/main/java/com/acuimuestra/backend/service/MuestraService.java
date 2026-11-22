@@ -4,9 +4,11 @@ import com.acuimuestra.backend.dto.CambioEstadoRequest;
 import com.acuimuestra.backend.dto.MuestraRequest;
 import com.acuimuestra.backend.dto.ResumenResponse;
 import com.acuimuestra.backend.model.EstadoRevision;
+import com.acuimuestra.backend.model.FotoMuestra;
 import com.acuimuestra.backend.model.Muestra;
 import com.acuimuestra.backend.model.Rol;
 import com.acuimuestra.backend.model.Usuario;
+import com.acuimuestra.backend.repository.FotoMuestraRepository;
 import com.acuimuestra.backend.repository.MuestraRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class MuestraService {
 
     public static final int MIN_COMENTARIO = 10;
+    public static final int MAX_FOTO_BYTES = 3 * 1024 * 1024;
 
     private static final EnumSet<EstadoRevision> REVISABLES = EnumSet.of(EstadoRevision.PENDIENTE, EstadoRevision.CORREGIDO);
     private static final EnumSet<EstadoRevision> DECISIONES = EnumSet.of(
@@ -30,10 +33,12 @@ public class MuestraService {
     public record Creacion(Muestra muestra, boolean nueva) {}
 
     private final MuestraRepository muestras;
+    private final FotoMuestraRepository fotos;
     private final AccesoService acceso;
 
-    public MuestraService(MuestraRepository muestras, AccesoService acceso) {
+    public MuestraService(MuestraRepository muestras, FotoMuestraRepository fotos, AccesoService acceso) {
         this.muestras = muestras;
+        this.fotos = fotos;
         this.acceso = acceso;
     }
 
@@ -103,7 +108,38 @@ public class MuestraService {
     @Transactional
     public void eliminar(String usuario, String id) {
         acceso.requerir(usuario, Rol.SUPERVISOR);
-        muestras.delete(buscar(id));
+        Muestra m = buscar(id);
+        fotos.deleteById(m.getId());
+        muestras.delete(m);
+    }
+
+    @Transactional
+    public void guardarFoto(String usuario, String id, byte[] datos) {
+        acceso.requerir(usuario, Rol.OPERADOR);
+        Muestra m = buscar(id);
+        if (!esJpeg(datos)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "La foto debe ser una imagen JPEG");
+        }
+        if (datos.length > MAX_FOTO_BYTES) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "La foto supera los 3 MB");
+        }
+        FotoMuestra foto = fotos.findById(id).orElseGet(() -> new FotoMuestra(id, datos));
+        foto.setDatos(datos);
+        fotos.save(foto);
+        m.setTieneFoto(true);
+        muestras.save(m);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] obtenerFoto(String usuario, String id) {
+        acceso.requerir(usuario);
+        return fotos.findById(id)
+                .map(FotoMuestra::getDatos)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La muestra " + id + " no tiene foto"));
+    }
+
+    private static boolean esJpeg(byte[] datos) {
+        return datos != null && datos.length > 2 && (datos[0] & 0xFF) == 0xFF && (datos[1] & 0xFF) == 0xD8;
     }
 
     @Transactional(readOnly = true)

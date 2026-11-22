@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +62,20 @@ public class MuestraController {
     public Muestra cambiarEstado(@RequestHeader(USUARIO) String usuario, @PathVariable String id,
                                  @Valid @RequestBody CambioEstadoRequest req) {
         return servicio.cambiarEstado(usuario, id, req);
+    }
+
+    @PutMapping(value = "/{id}/foto", consumes = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Sube o reemplaza la foto de una muestra (operador, JPEG de hasta 3 MB)")
+    public void subirFoto(@RequestHeader(USUARIO) String usuario, @PathVariable String id,
+                          @RequestBody byte[] foto) {
+        servicio.guardarFoto(usuario, id, foto);
+    }
+
+    @GetMapping("/{id}/foto")
+    @Operation(summary = "Descarga la foto de una muestra")
+    public ResponseEntity<byte[]> foto(@RequestHeader(USUARIO) String usuario, @PathVariable String id) {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(servicio.obtenerFoto(usuario, id));
     }
 
     @DeleteMapping("/{id}")

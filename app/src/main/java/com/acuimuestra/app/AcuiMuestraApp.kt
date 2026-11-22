@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.acuimuestra.app.data.local.AcuiMuestraDatabase
+import com.acuimuestra.app.data.local.AlmacenFotosAndroid
 import com.acuimuestra.app.data.local.DatosPrueba
 import com.acuimuestra.app.data.remote.ApiCliente
 import com.acuimuestra.app.data.remote.MarinaCliente
@@ -39,6 +40,7 @@ class AppContainer(app: Application, db: AcuiMuestraDatabase) {
         muestraDao = db.muestraDao(),
         usuarioDao = db.usuarioDao(),
         api = ApiCliente.crear(),
+        fotos = AlmacenFotosAndroid(app),
         usuarioConsulta = { usuarioRepository.usuarioActual.value?.usuario ?: "operador" }
     )
     val relojRed = RelojRed()
