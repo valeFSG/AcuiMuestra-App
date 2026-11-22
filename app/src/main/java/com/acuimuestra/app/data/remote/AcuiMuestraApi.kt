@@ -3,6 +3,8 @@ package com.acuimuestra.app.data.remote
 import com.acuimuestra.app.BuildConfig
 import com.acuimuestra.app.data.model.EstadoRevision
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -38,6 +40,16 @@ interface AcuiMuestraApi {
         @Path("id") id: String,
         @Body cambio: CambioEstadoEnvio
     ): MuestraRemota
+
+    @PUT("api/muestras/{id}/foto")
+    suspend fun subirFoto(
+        @Header(USUARIO) usuario: String,
+        @Path("id") id: String,
+        @Body foto: RequestBody
+    )
+
+    @GET("api/muestras/{id}/foto")
+    suspend fun descargarFoto(@Header(USUARIO) usuario: String, @Path("id") id: String): ResponseBody
 }
 
 data class MuestraEnvio(
@@ -71,7 +83,8 @@ data class MuestraRemota(
     val pesoGramos: Double?,
     val estado: EstadoRevision,
     val comentarioSupervisor: String?,
-    val conteoMarcado: Int? = null
+    val conteoMarcado: Int? = null,
+    val tieneFoto: Boolean = false
 )
 
 data class CambioEstadoEnvio(val estado: EstadoRevision, val comentario: String?)

@@ -1,6 +1,7 @@
 package com.acuimuestra.app.data.repository
 
 import com.acuimuestra.app.Datos
+import com.acuimuestra.app.data.local.AlmacenFotos
 import com.acuimuestra.app.data.local.MuestraDao
 import com.acuimuestra.app.data.local.UsuarioDao
 import com.acuimuestra.app.data.model.EstadoRevision
@@ -32,7 +33,8 @@ class SincronizacionRepositoryTest {
     private val muestraDao = mockk<MuestraDao>()
     private val usuarioDao = mockk<UsuarioDao>()
     private val api = mockk<AcuiMuestraApi>()
-    private val repositorio = SincronizacionRepository(muestraDao, usuarioDao, api) { "operador" }
+    private val fotos = mockk<AlmacenFotos>()
+    private val repositorio = SincronizacionRepository(muestraDao, usuarioDao, api, fotos) { "operador" }
 
     private fun errorHttp(codigo: Int) = HttpException(Response.error<Any>(codigo, "{}".toResponseBody(null)))
 
@@ -72,6 +74,8 @@ class SincronizacionRepositoryTest {
         coEvery { api.cambiarEstado(any(), any(), any()) } returns remota()
         coEvery { api.corregir(any(), any(), any()) } returns remota()
         coEvery { api.listar(any()) } returns emptyList()
+        coEvery { api.subirFoto(any(), any(), any()) } just runs
+        coEvery { fotos.leerParaEnviar(any()) } returns null
     }
 
     @Test
@@ -203,5 +207,75 @@ class SincronizacionRepositoryTest {
         coEvery { api.listar(any()) } returns listOf(remota())
 
         assertEquals(ResultadoSincronizacion(enviadas = 1, recibidas = 1), repositorio.sincronizar())
+    }
+
+    @Test
+    fun enviar_conFoto_laSubeComoOperador() = runTest {
+        coEvery { muestraDao.pendientes() } returns listOf(pendiente(Datos.muestra()))
+        coEvery { fotos.leerParaEnviar("file:///fotos/muestra7.jpg") } returns byteArrayOf(1, 2, 3)
+
+        repositorio.enviar()
+
+        coVerify { api.subirFoto("operador", "u-7", match { it.contentLength() == 3L }) }
+        coVerify { muestraDao.marcarSincronizada("u-7") }
+    }
+
+    @Test
+    fun enviar_fotoIlegible_noLaSubePeroSincronizaLosDatos() = runTest {
+        coEvery { muestraDao.pendientes() } returns listOf(pendiente(Datos.muestra()))
+
+        assertEquals(1, repositorio.enviar())
+
+        coVerify(exactly = 0) { api.subirFoto(any(), any(), any()) }
+    }
+
+    @Test
+    fun enviar_sinFoto_noIntentaLeerla() = runTest {
+        coEvery { muestraDao.pendientes() } returns listOf(pendiente(Datos.muestra().copy(fotoUri = null)))
+
+        repositorio.enviar()
+
+        coVerify(exactly = 0) { fotos.leerParaEnviar(any()) }
+    }
+
+    @Test
+    fun recibir_muestraConFoto_laDescargaYLaGuarda() = runTest {
+        coEvery { muestraDao.buscarPorUuid("u-7") } returns null
+        coEvery { api.listar(any()) } returns listOf(remota().copy(tieneFoto = true))
+        coEvery { api.descargarFoto("operador", "u-7") } returns "jpg".toResponseBody(null)
+        coEvery { fotos.guardarRecibida("u-7", any()) } returns "content://fotos/remota_u-7.jpg"
+        val insertada = slot<Muestra>()
+        coEvery { muestraDao.insertar(capture(insertada)) } returns 20L
+
+        repositorio.recibir()
+
+        assertEquals("content://fotos/remota_u-7.jpg", insertada.captured.fotoUri)
+    }
+
+    @Test
+    fun recibir_fotoNoDisponible_insertaSinFoto() = runTest {
+        coEvery { muestraDao.buscarPorUuid(any()) } returns null
+        coEvery { api.listar(any()) } returns listOf(
+            remota().copy(tieneFoto = true),
+            remota().copy(id = "u-8", tieneFoto = true)
+        )
+        coEvery { api.descargarFoto(any(), "u-7") } throws errorHttp(404)
+        coEvery { api.descargarFoto(any(), "u-8") } throws IOException("sin red")
+        val insertadas = mutableListOf<Muestra>()
+        coEvery { muestraDao.insertar(capture(insertadas)) } returns 20L
+
+        assertEquals(2, repositorio.recibir())
+
+        assertTrue(insertadas.all { it.fotoUri == null })
+    }
+
+    @Test
+    fun recibir_conFotoLocal_noLaDescargaDeNuevo() = runTest {
+        coEvery { muestraDao.buscarPorUuid("u-7") } returns Datos.muestra(sincronizada = true)
+        coEvery { api.listar(any()) } returns listOf(remota().copy(tieneFoto = true))
+
+        repositorio.recibir()
+
+        coVerify(exactly = 0) { api.descargarFoto(any(), any()) }
     }
 }

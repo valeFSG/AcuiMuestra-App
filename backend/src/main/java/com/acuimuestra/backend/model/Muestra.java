@@ -46,6 +46,8 @@ public class Muestra {
     @Column(length = 120)
     private String fotoNombre;
 
+    private Boolean tieneFoto;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoRevision estado = EstadoRevision.PENDIENTE;
@@ -94,6 +96,8 @@ public class Muestra {
     public void setPesoGramos(Double pesoGramos) { this.pesoGramos = pesoGramos; }
     public String getFotoNombre() { return fotoNombre; }
     public void setFotoNombre(String fotoNombre) { this.fotoNombre = fotoNombre; }
+    public boolean isTieneFoto() { return Boolean.TRUE.equals(tieneFoto); }
+    public void setTieneFoto(boolean tieneFoto) { this.tieneFoto = tieneFoto; }
     public EstadoRevision getEstado() { return estado; }
     public void setEstado(EstadoRevision estado) { this.estado = estado; }
     public String getComentarioSupervisor() { return comentarioSupervisor; }
