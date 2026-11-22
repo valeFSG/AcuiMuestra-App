@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlin.math.roundToInt
 
 data class BarraDato(val etiqueta: String, val valor: Int)
 
@@ -24,6 +25,7 @@ data class DashboardUiState(
     val porRevisar: Int = 0,
     val porCentro: List<BarraDato> = emptyList(),
     val porEstado: Map<EstadoRevision, Int> = emptyMap(),
+    val densidadPorCentro: List<BarraDato> = emptyList(),
     val lineas: List<String> = emptyList(),
     val lineaSeleccionada: String? = null,
     val evolucion: List<PuntoEvolucion> = emptyList()
@@ -63,6 +65,15 @@ fun calcularDashboard(muestras: List<MuestraResumen>, elegida: String?): Dashboa
             .map { (centro, cantidad) -> BarraDato(centro, cantidad) }
             .sortedWith(compareByDescending<BarraDato> { it.valor }.thenBy { it.etiqueta }),
         porEstado = EstadoRevision.entries.associateWith { estado -> muestras.count { it.estado == estado } },
+        densidadPorCentro = muestras
+            .filter { it.estado != EstadoRevision.DESCARTADO }
+            .groupBy { it.centroNombre }
+            .mapNotNull { (centro, lista) ->
+                lista.mapNotNull { ReglasRegistro.densidadPorMetro(it.conteo, it.tramoCm) }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { BarraDato(centro, it.average().roundToInt()) }
+            }
+            .sortedWith(compareByDescending<BarraDato> { it.valor }.thenBy { it.etiqueta }),
         lineas = lineas,
         lineaSeleccionada = seleccionada,
         evolucion = muestras

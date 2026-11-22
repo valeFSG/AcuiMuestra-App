@@ -49,6 +49,20 @@ class DashboardViewModelTest {
     }
 
     @Test
+    fun calculaDensidadPromedioPorCentroSinDescartadas() {
+        val estado = calcularDashboard(muestras, null)
+
+        assertEquals(listOf(BarraDato("Centro Ficticio Sur", 515), BarraDato("Centro Ficticio Norte", 505)), estado.densidadPorCentro)
+    }
+
+    @Test
+    fun densidad_ignoraMuestrasSinTramo() {
+        val sinTramo = Datos.resumen(9, EstadoRevision.VALIDADO, "Centro Ficticio Este").copy(tramoCm = 0)
+
+        assertTrue(calcularDashboard(listOf(sinTramo), null).densidadPorCentro.isEmpty())
+    }
+
+    @Test
     fun porDefectoEligeLaLineaConMasMuestrasYOrdenaPorFechaSinDescartadas() {
         val estado = calcularDashboard(muestras, null)
 
@@ -71,6 +85,7 @@ class DashboardViewModelTest {
 
         assertEquals(0, estado.total)
         assertTrue(estado.porCentro.isEmpty())
+        assertTrue(estado.densidadPorCentro.isEmpty())
         assertTrue(estado.lineas.isEmpty())
         assertNull(estado.lineaSeleccionada)
         assertTrue(estado.evolucion.isEmpty())

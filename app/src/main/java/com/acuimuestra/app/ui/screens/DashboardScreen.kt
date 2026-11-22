@@ -87,6 +87,9 @@ fun DashboardScreen(
                 Indicadores(estado)
                 SeccionGrafico("Muestras por centro") { GraficoBarras(estado.porCentro, MaterialTheme.colorScheme.primary) }
                 SeccionGrafico("Muestras por estado") { GraficoEstados(estado.porEstado) }
+                SeccionGrafico("Densidad promedio por centro (ind/m)") {
+                    GraficoBarras(estado.densidadPorCentro, MaterialTheme.colorScheme.secondary)
+                }
                 SeccionGrafico("Evolución del conteo en una línea") {
                     SelectorLinea(estado.lineas, estado.lineaSeleccionada, viewModel::elegirLinea)
                     GraficoEvolucion(estado.evolucion)
