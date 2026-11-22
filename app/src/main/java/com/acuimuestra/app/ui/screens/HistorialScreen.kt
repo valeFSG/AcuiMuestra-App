@@ -70,6 +70,7 @@ fun HistorialScreen(
     onVerDetalle: (Long) -> Unit,
     onVolver: () -> Unit,
     onExportar: () -> Unit,
+    onDashboard: () -> Unit,
     viewModel: HistorialViewModel = viewModel(factory = HistorialViewModel.Factory)
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
@@ -104,6 +105,9 @@ fun HistorialScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f)
                     )
+                }
+                TextButton(onClick = onDashboard, enabled = estado.todas.isNotEmpty()) {
+                    Text("📊 Panel", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
                 OutlinedButton(
                     onClick = onExportar,
