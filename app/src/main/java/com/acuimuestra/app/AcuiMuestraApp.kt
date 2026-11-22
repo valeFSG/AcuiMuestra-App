@@ -4,9 +4,11 @@ import android.app.Application
 import com.acuimuestra.app.data.local.AcuiMuestraDatabase
 import com.acuimuestra.app.data.local.DatosPrueba
 import com.acuimuestra.app.data.remote.ApiCliente
+import com.acuimuestra.app.data.remote.MarinaCliente
 import com.acuimuestra.app.data.remote.RedMonitor
 import com.acuimuestra.app.data.remote.RelojRed
 import com.acuimuestra.app.data.repository.CatalogoRepository
+import com.acuimuestra.app.data.repository.MarinaRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
 import com.acuimuestra.app.data.repository.SincronizacionRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
@@ -32,6 +34,7 @@ class AppContainer(app: Application, db: AcuiMuestraDatabase) {
         usuarioConsulta = { usuarioRepository.usuarioActual.value?.usuario ?: "operador" }
     )
     val relojRed = RelojRed()
+    val marinaRepository = MarinaRepository(MarinaCliente.crear())
 }
 
 class AcuiMuestraApp : Application() {

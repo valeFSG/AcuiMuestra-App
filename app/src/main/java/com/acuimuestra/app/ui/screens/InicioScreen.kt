@@ -28,11 +28,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.R
 import com.acuimuestra.app.data.model.Rol
+import com.acuimuestra.app.data.repository.MarinaRepository
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.ui.theme.VerdeOscuro
 import com.acuimuestra.app.ui.theme.VerdeSecundario
+import com.acuimuestra.app.viewmodel.EstadoMarina
 import com.acuimuestra.app.viewmodel.InicioViewModel
+import java.util.Locale
 
 @Composable
 fun InicioScreen(
@@ -42,6 +45,7 @@ fun InicioScreen(
     viewModel: InicioViewModel = viewModel(factory = InicioViewModel.Factory)
 ) {
     val usuario by viewModel.usuario.collectAsStateWithLifecycle()
+    val marina by viewModel.marina.collectAsStateWithLifecycle()
 
     LaunchedEffect(usuario) {
         if (usuario == null) onCerrarSesion()
@@ -101,6 +105,8 @@ fun InicioScreen(
             Modifier.padding(24.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            TarjetaMarina(marina, onReintentar = viewModel::cargarMarina)
+
             Text("¿Qué quieres hacer hoy?", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
             if (esSupervisor) {
@@ -182,3 +188,79 @@ private fun CardAccion(
         }
     }
 }
+
+@Composable
+private fun TarjetaMarina(estado: EstadoMarina, onReintentar: () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🌊", fontSize = 20.sp)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "Condiciones del mar",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+                Surface(color = MaterialTheme.colorScheme.tertiaryContainer, shape = CircleShape) {
+                    Text(
+                        "Referencial",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            when (estado) {
+                EstadoMarina.Cargando -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(10.dp))
+                    Text("Consultando pronóstico…", style = MaterialTheme.typography.bodyMedium)
+                }
+                is EstadoMarina.Listo -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DatoMarino("Oleaje", estado.condicion.alturaOlaM.formatear("m"), Modifier.weight(1f))
+                    DatoMarino("Temp. del mar", estado.condicion.temperaturaMarC.formatear("°C"), Modifier.weight(1f))
+                }
+                EstadoMarina.SinDatos -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "No se pudo obtener el pronóstico. Revisa la conexión.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = onReintentar) { Text("Reintentar") }
+                }
+            }
+
+            Text(
+                "Pronóstico de Open-Meteo para el ${MarinaRepository.NOMBRE_REFERENCIA}. " +
+                        "Es un dato referencial, no una medición del centro de cultivo.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun DatoMarino(etiqueta: String, valor: String, modifier: Modifier = Modifier) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(14.dp),
+        modifier = modifier
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(etiqueta, style = MaterialTheme.typography.labelMedium)
+            Text(valor, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+private fun Double?.formatear(unidad: String): String =
+    this?.let { String.format(Locale.forLanguageTag("es-CL"), "%.1f %s", it, unidad) } ?: "—"
