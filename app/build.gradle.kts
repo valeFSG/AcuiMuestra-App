@@ -14,6 +14,8 @@ val propiedadesLocales = Properties().apply {
     if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 val urlApi: String = propiedadesLocales.getProperty("api.url") ?: "http://10.0.2.2:8080/"
+val urlApiNube: String = propiedadesLocales.getProperty("api.url.release") ?: urlApi
+val claveApi: String = propiedadesLocales.getProperty("api.key") ?: ""
 val archivoFirma: String? = propiedadesLocales.getProperty("release.storeFile")
 
 android {
@@ -28,6 +30,7 @@ android {
         versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "API_URL", "\"$urlApi\"")
+        buildConfigField("String", "API_KEY", "\"\"")
     }
 
     signingConfigs {
@@ -44,6 +47,8 @@ android {
     buildTypes {
         release {
             if (archivoFirma != null) signingConfig = signingConfigs.getByName("release")
+            buildConfigField("String", "API_URL", "\"$urlApiNube\"")
+            buildConfigField("String", "API_KEY", "\"$claveApi\"")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
