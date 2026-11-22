@@ -303,7 +303,7 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
                         "⟳ Pendiente de sincronización",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = ColorPendiente
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
             }
@@ -311,14 +311,12 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
     }
 }
 
-private val ColorPendiente = Color(0xFFB26B00)
-
 @Composable
 private fun BarraSincronizacion(estado: EstadoSincronizacion, onSincronizar: () -> Unit) {
     val (fondo, texto) = when {
-        !estado.enLinea -> Color(0xFFFFF4E0) to "Modo sin conexión · ${estado.pendientes} pendiente(s). Se enviarán al volver internet."
+        !estado.enLinea -> MaterialTheme.colorScheme.tertiaryContainer to "Modo sin conexión · ${estado.pendientes} pendiente(s). Se enviarán al volver internet."
         estado.sincronizando -> MaterialTheme.colorScheme.primaryContainer to "Sincronizando con el servidor…"
-        estado.pendientes > 0 -> Color(0xFFFFF4E0) to "${estado.pendientes} muestra(s) pendiente(s) de sincronización"
+        estado.pendientes > 0 -> MaterialTheme.colorScheme.tertiaryContainer to "${estado.pendientes} muestra(s) pendiente(s) de sincronización"
         else -> MaterialTheme.colorScheme.secondaryContainer to "✓ Todo sincronizado con el servidor"
     }
     Surface(

@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.BotonTema
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -77,6 +78,7 @@ fun InicioScreen(
                         color = Color.White.copy(alpha = 0.85f),
                         modifier = Modifier.weight(1f)
                     )
+                    BotonTema()
                     TextButton(onClick = viewModel::cerrarSesion) {
                         Text("Cerrar sesión", color = Color.White)
                     }
