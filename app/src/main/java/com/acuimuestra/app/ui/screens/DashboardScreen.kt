@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -58,7 +59,7 @@ fun DashboardScreen(
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 24.dp)
         ) {
             TextButton(onClick = onVolver, contentPadding = PaddingValues(0.dp), modifier = Modifier.offset(x = (-4).dp)) {
-                Text("‹ Historial", color = Color.White, fontWeight = FontWeight.SemiBold)
+                EtiquetaVolver("Historial", Color.White, FontWeight.SemiBold)
             }
             Text(
                 "Panel de muestras",

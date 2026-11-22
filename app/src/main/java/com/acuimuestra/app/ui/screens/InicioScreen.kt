@@ -1,5 +1,9 @@
 package com.acuimuestra.app.ui.screens
 
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.acuimuestra.app.ui.components.BotonTema
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -120,7 +124,7 @@ fun InicioScreen(
                 Rol.SUPERVISOR -> CardAccion(
                     titulo = "Revisar muestras",
                     descripcion = "Valida, observa o descarta los registros",
-                    simbolo = "✓",
+                    icono = Icons.Outlined.Check,
                     colores = listOf(VerdeOscuro, VerdeSecundario),
                     onClick = onHistorial,
                     imagen = R.drawable.inicio_revisar
@@ -128,7 +132,7 @@ fun InicioScreen(
                 Rol.ANALISTA -> CardAccion(
                     titulo = "Consultar muestras",
                     descripcion = "Revisa el historial, el panel y exporta reportes",
-                    simbolo = "≡",
+                    icono = Icons.AutoMirrored.Outlined.List,
                     colores = listOf(VerdeOscuro, VerdeSecundario),
                     onClick = onHistorial,
                     imagen = R.drawable.inicio_historial
@@ -137,7 +141,7 @@ fun InicioScreen(
                     CardAccion(
                         titulo = "Nueva muestra",
                         descripcion = "Registra una muestra de chorito en terreno",
-                        simbolo = "+",
+                        icono = Icons.Outlined.Add,
                         colores = listOf(AzulProfundo, AzulPrincipal),
                         onClick = onNuevaMuestra,
                         imagen = R.drawable.inicio_nueva_muestra
@@ -145,7 +149,7 @@ fun InicioScreen(
                     CardAccion(
                         titulo = "Historial",
                         descripcion = "Consulta y filtra las muestras registradas",
-                        simbolo = "≡",
+                        icono = Icons.AutoMirrored.Outlined.List,
                         colores = listOf(VerdeOscuro, VerdeSecundario),
                         onClick = onHistorial,
                         imagen = R.drawable.inicio_historial
@@ -160,7 +164,7 @@ fun InicioScreen(
 private fun CardAccion(
     titulo: String,
     descripcion: String,
-    simbolo: String,
+    icono: ImageVector,
     colores: List<Color>,
     onClick: () -> Unit,
     @DrawableRes imagen: Int? = null
@@ -196,7 +200,7 @@ private fun CardAccion(
                 .background(Color.White.copy(alpha = 0.22f)),
             contentAlignment = Alignment.Center
         ) {
-            Text(simbolo, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Icon(icono, contentDescription = null, tint = Color.White)
         }
         Column(Modifier.align(Alignment.BottomStart).padding(20.dp)) {
             Text(titulo, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.White)

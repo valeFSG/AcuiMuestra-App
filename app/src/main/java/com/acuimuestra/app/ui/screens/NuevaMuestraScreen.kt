@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -39,7 +40,7 @@ fun NuevaMuestraScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        TextButton(onClick = onCancelar, contentPadding = PaddingValues(0.dp)) { Text("‹ Cancelar") }
+        TextButton(onClick = onCancelar, contentPadding = PaddingValues(0.dp)) { EtiquetaVolver("Cancelar") }
         Column {
             Text("Paso 1 de 4", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text("Nueva muestra", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)

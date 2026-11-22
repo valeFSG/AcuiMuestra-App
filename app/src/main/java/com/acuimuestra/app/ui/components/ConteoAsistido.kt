@@ -1,5 +1,7 @@
 package com.acuimuestra.app.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -61,7 +63,7 @@ fun ConteoAsistido(
                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onCerrar) { Text("‹ Volver", color = Color.White) }
+                    TextButton(onClick = onCerrar) { EtiquetaVolver(color = Color.White) }
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                         AnimatedContent(
                             targetState = marcas.size,
@@ -125,7 +127,7 @@ fun ConteoAsistido(
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         modifier = Modifier.weight(1f).height(52.dp)
-                    ) { Text("↶ Deshacer") }
+                    ) { TextoConIcono(Icons.AutoMirrored.Outlined.Undo, "Deshacer") }
                     OutlinedButton(
                         onClick = onLimpiar,
                         enabled = marcas.isNotEmpty(),

@@ -1,5 +1,7 @@
 package com.acuimuestra.app.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -113,7 +115,7 @@ private fun VistaCamara(onFotoTomada: (String) -> Unit, onCerrar: () -> Unit) {
         TextButton(
             onClick = onCerrar,
             modifier = Modifier.align(Alignment.TopStart).safeDrawingPadding().padding(8.dp)
-        ) { Text("✕ Cerrar", color = Color.White) }
+        ) { TextoConIcono(Icons.Outlined.Close, "Cerrar", Color.White) }
 
         error?.let {
             Text(

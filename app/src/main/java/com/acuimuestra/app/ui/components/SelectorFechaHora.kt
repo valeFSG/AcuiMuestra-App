@@ -1,5 +1,8 @@
 package com.acuimuestra.app.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,7 +61,7 @@ fun SelectorFechaHora(
         onValueChange = {},
         readOnly = true,
         label = { Text("Fecha y hora del muestreo") },
-        trailingIcon = { Text("📅") },
+        trailingIcon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = null) },
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
         interactionSource = interaccion,
@@ -151,4 +154,3 @@ private fun SelectorFechaHoraPreview() {
         )
     }
 }
-
