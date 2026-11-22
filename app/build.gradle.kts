@@ -15,7 +15,7 @@ val propiedadesLocales = Properties().apply {
 }
 val urlApi: String = propiedadesLocales.getProperty("api.url") ?: "http://10.0.2.2:8080/"
 val urlApiNube: String = propiedadesLocales.getProperty("api.url.release") ?: urlApi
-val claveApi: String = propiedadesLocales.getProperty("api.key") ?: ""
+val claveApi: String = propiedadesLocales.getProperty("api.key")?.trim() ?: ""
 val archivoFirma: String? = propiedadesLocales.getProperty("release.storeFile")
 
 android {
