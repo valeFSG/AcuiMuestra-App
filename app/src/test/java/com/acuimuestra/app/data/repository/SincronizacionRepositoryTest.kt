@@ -278,4 +278,26 @@ class SincronizacionRepositoryTest {
 
         coVerify(exactly = 0) { api.descargarFoto(any(), any()) }
     }
+
+    @Test
+    fun enviar_muestraRevisada_usaElSupervisorQueLaReviso() = runTest {
+        val validada = Datos.muestra(estado = EstadoRevision.VALIDADO).copy(revisadoPor = "supervisora2", usuarioCambio = "operador")
+        coEvery { muestraDao.pendientes() } returns listOf(pendiente(validada))
+
+        repositorio.enviar()
+
+        coVerify { api.cambiarEstado("supervisora2", "u-7", any()) }
+    }
+
+    @Test
+    fun recibir_guardaQuienRevisoLaMuestra() = runTest {
+        coEvery { muestraDao.buscarPorUuid("u-7") } returns null
+        coEvery { api.listar(any()) } returns listOf(remota().copy(revisadoPor = "supervisor"))
+        val insertada = slot<Muestra>()
+        coEvery { muestraDao.insertar(capture(insertada)) } returns 20L
+
+        repositorio.recibir()
+
+        assertEquals("supervisor", insertada.captured.revisadoPor)
+    }
 }

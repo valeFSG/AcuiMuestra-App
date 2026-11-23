@@ -55,6 +55,9 @@ public class Muestra {
     @Column(length = 500)
     private String comentarioSupervisor;
 
+    @Column(length = 40)
+    private String revisadoPor;
+
     private Long actualizadaEn;
 
     protected Muestra() {}
@@ -102,6 +105,8 @@ public class Muestra {
     public void setEstado(EstadoRevision estado) { this.estado = estado; }
     public String getComentarioSupervisor() { return comentarioSupervisor; }
     public void setComentarioSupervisor(String comentarioSupervisor) { this.comentarioSupervisor = comentarioSupervisor; }
+    public String getRevisadoPor() { return revisadoPor; }
+    public void setRevisadoPor(String revisadoPor) { this.revisadoPor = revisadoPor; }
     public Long getActualizadaEn() { return actualizadaEn; }
 
     public Double getDensidadPorMetro() {

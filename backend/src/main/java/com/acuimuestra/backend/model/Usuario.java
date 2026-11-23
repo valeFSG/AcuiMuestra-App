@@ -32,4 +32,9 @@ public class Usuario {
     public String getNombreUsuario() { return nombreUsuario; }
     public String getNombre() { return nombre; }
     public Rol getRol() { return rol; }
+
+    public void actualizar(String nombre, Rol rol) {
+        this.nombre = nombre;
+        this.rol = rol;
+    }
 }

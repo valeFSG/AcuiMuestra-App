@@ -84,7 +84,8 @@ data class MuestraRemota(
     val estado: EstadoRevision,
     val comentarioSupervisor: String?,
     val conteoMarcado: Int? = null,
-    val tieneFoto: Boolean = false
+    val tieneFoto: Boolean = false,
+    val revisadoPor: String? = null
 )
 
 data class CambioEstadoEnvio(val estado: EstadoRevision, val comentario: String?)

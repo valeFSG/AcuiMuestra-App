@@ -47,7 +47,7 @@ interface MuestraDao {
     @Query(
         """
         UPDATE muestras SET estado = :estado, comentarioSupervisor = :comentario,
-            usuarioCambio = :usuario, sincronizada = 0
+            usuarioCambio = :usuario, revisadoPor = :usuario, sincronizada = 0
         WHERE id = :id
         """
     )
@@ -87,12 +87,14 @@ interface MuestraDao {
                m.calibrePromedioMm, m.calibreMinMm, m.calibreMaxMm, m.pesoGramos,
                m.estado, m.comentarioSupervisor, m.horaVerificada, m.sincronizada, m.conteoMarcado,
                c.nombre AS centroNombre, t.nombre AS trenNombre,
-               l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
+               l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre,
+               r.nombreVisible AS revisorNombre
         FROM muestras m
         JOIN centros c ON c.id = m.centroId
         JOIN trenes t ON t.id = m.trenId
         JOIN lineas l ON l.id = m.lineaId
         JOIN usuarios u ON u.id = m.operadorId
+        LEFT JOIN usuarios r ON r.usuario = m.revisadoPor
         WHERE m.id = :id
         """
     )

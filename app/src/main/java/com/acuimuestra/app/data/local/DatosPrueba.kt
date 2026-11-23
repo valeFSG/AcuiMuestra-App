@@ -10,9 +10,10 @@ object DatosPrueba {
         db.withTransaction {
             db.usuarioDao().insertarTodos(
                 listOf(
-                    Usuario(id = 1, usuario = "operador", clave = "1234", nombreVisible = "Operador", rol = Rol.OPERADOR),
-                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Supervisor", rol = Rol.SUPERVISOR),
-                    Usuario(id = 3, usuario = "analista", clave = "1234", nombreVisible = "Analista", rol = Rol.ANALISTA)
+                    Usuario(id = 1, usuario = "operador", clave = "1234", nombreVisible = "Camila Rojas", rol = Rol.OPERADOR),
+                    Usuario(id = 2, usuario = "supervisor", clave = "1234", nombreVisible = "Andrea Soto", rol = Rol.SUPERVISOR),
+                    Usuario(id = 3, usuario = "analista", clave = "1234", nombreVisible = "Felipe Vargas", rol = Rol.ANALISTA),
+                    Usuario(id = 4, usuario = "operador2", clave = "1234", nombreVisible = "Diego Muñoz", rol = Rol.OPERADOR)
                 )
             )
 
@@ -54,7 +55,8 @@ object DatosPrueba {
                             EstadoRevision.OBSERVADO -> "Conteo dudoso, repetir el tramo"
                             EstadoRevision.DESCARTADO -> "Muestra duplicada por error de registro"
                             else -> null
-                        }
+                        },
+                        revisadoPor = if (estado == EstadoRevision.PENDIENTE) null else "supervisor"
 
                     )
                 )
