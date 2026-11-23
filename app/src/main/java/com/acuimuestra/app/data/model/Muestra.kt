@@ -40,5 +40,6 @@ data class Muestra(
     val horaVerificada: Boolean = true,
     val sincronizada: Boolean = false,
     val usuarioCambio: String? = null,
-    val conteoMarcado: Int? = null
+    val conteoMarcado: Int? = null,
+    val revisadoPor: String? = null
 )

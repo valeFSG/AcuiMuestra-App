@@ -20,12 +20,17 @@ public class DatosIniciales {
     @Bean
     CommandLineRunner cargarDatos(UsuarioRepository usuarios, MuestraRepository muestras) {
         return args -> {
-            if (usuarios.count() == 0) {
-                usuarios.saveAll(List.of(
-                        new Usuario("operador", "Operador de muestreo", Rol.OPERADOR),
-                        new Usuario("supervisor", "Supervisor técnico", Rol.SUPERVISOR),
-                        new Usuario("analista", "Analista de datos", Rol.ANALISTA)));
-            }
+            List.of(
+                    new Usuario("operador", "Camila Rojas", Rol.OPERADOR),
+                    new Usuario("operador2", "Diego Muñoz", Rol.OPERADOR),
+                    new Usuario("supervisor", "Andrea Soto", Rol.SUPERVISOR),
+                    new Usuario("analista", "Felipe Vargas", Rol.ANALISTA)
+            ).forEach(base -> usuarios.findByNombreUsuario(base.getNombreUsuario()).ifPresentOrElse(
+                    existente -> {
+                        existente.actualizar(base.getNombre(), base.getRol());
+                        usuarios.save(existente);
+                    },
+                    () -> usuarios.save(base)));
             if (muestras.count() == 0) {
                 long ahora = System.currentTimeMillis();
                 muestras.saveAll(List.of(

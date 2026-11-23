@@ -84,6 +84,7 @@ fun DetalleScreen(
                                     if (muestra.horaVerificada) " · hora de red" else " · no verificada (sin conexión)"
                         )
                         Dato("Operador", muestra.operadorNombre)
+                        muestra.revisorNombre?.let { Dato("Revisado por", it) }
                         Dato("Fotografía", if (muestra.fotoUri != null) "Adjunta" else "Sin fotografía")
                         muestra.conteoMarcado?.let { marcadas ->
                             Dato(

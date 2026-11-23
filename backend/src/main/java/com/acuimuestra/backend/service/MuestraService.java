@@ -86,7 +86,7 @@ public class MuestraService {
 
     @Transactional
     public Muestra cambiarEstado(String usuario, String id, CambioEstadoRequest req) {
-        acceso.requerir(usuario, Rol.SUPERVISOR);
+        Usuario revisor = acceso.requerir(usuario, Rol.SUPERVISOR);
         Muestra m = buscar(id);
         if (!REVISABLES.contains(m.getEstado())) {
             throw new ApiException(HttpStatus.CONFLICT, "La muestra está " + m.getEstado() + " y no se puede revisar");
@@ -102,6 +102,7 @@ public class MuestraService {
         }
         m.setEstado(req.estado());
         m.setComentarioSupervisor(comentario.isEmpty() ? null : comentario);
+        m.setRevisadoPor(revisor.getNombreUsuario());
         return muestras.save(m);
     }
 

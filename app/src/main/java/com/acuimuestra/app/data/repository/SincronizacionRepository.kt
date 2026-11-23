@@ -38,7 +38,7 @@ class SincronizacionRepository(
                 EstadoRevision.OBSERVADO, EstadoRevision.VALIDADO, EstadoRevision.DESCARTADO ->
                     aceptadaPorServidor {
                         api.cambiarEstado(
-                            m.usuarioCambio ?: SUPERVISOR_POR_DEFECTO,
+                            m.revisadoPor ?: m.usuarioCambio ?: SUPERVISOR_POR_DEFECTO,
                             m.uuid,
                             CambioEstadoEnvio(m.estado, m.comentarioSupervisor)
                         )
@@ -92,6 +92,7 @@ class SincronizacionRepository(
             comentarioSupervisor = remota.comentarioSupervisor,
             sincronizada = true,
             usuarioCambio = local?.usuarioCambio,
+            revisadoPor = remota.revisadoPor ?: local?.revisadoPor,
             conteoMarcado = remota.conteoMarcado
         )
     }
