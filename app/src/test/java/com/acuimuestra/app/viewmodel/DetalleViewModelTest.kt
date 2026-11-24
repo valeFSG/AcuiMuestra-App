@@ -4,6 +4,10 @@ import com.acuimuestra.app.Datos
 import com.acuimuestra.app.MainDispatcherRule
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraDetalle
+import com.acuimuestra.app.data.model.Rol
+import com.acuimuestra.app.data.remote.AnalisisIa
+import com.acuimuestra.app.data.repository.AnalisisIaRepository
+import com.acuimuestra.app.data.repository.ErrorAnalisisIa
 import com.acuimuestra.app.data.model.Usuario
 import com.acuimuestra.app.data.repository.MuestraRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
@@ -202,5 +206,58 @@ class DetalleViewModelTest {
         assertEquals("Ingresa un número entero", DetalleViewModel.validarEntero("1,5", "El conteo"))
         assertNull(DetalleViewModel.validarEntero("12", "El conteo"))
         assertNull(DetalleViewModel.validarComentario("Comentario suficiente"))
+    }
+
+    private val analisisIa = mockk<AnalisisIaRepository>()
+    private val resultadoIa = AnalisisIa(150, true, "buena", "Se ven cholgas", 185, 18.9, true, "gemini-flash-latest")
+
+    private fun conIa(): DetalleViewModel = DetalleViewModel(7, muestraRepository, usuarios, analisisIa)
+
+    @Test
+    fun analizarConIa_muestraElResultado() = runTest {
+        coEvery { analisisIa.analizar("u-7") } returns Result.success(resultadoIa)
+        viewModel = conIa()
+        observar()
+
+        assertTrue(estado.puedeAnalizar)
+        viewModel.analizarConIa()
+
+        assertEquals(EstadoAnalisisIa.Listo(resultadoIa), estado.analisis)
+    }
+
+    @Test
+    fun analizarConIa_conError_muestraElMensaje() = runTest {
+        coEvery { analisisIa.analizar(any()) } returns Result.failure(ErrorAnalisisIa("La IA está ocupada"))
+        viewModel = conIa()
+        observar()
+
+        viewModel.analizarConIa()
+
+        assertEquals(EstadoAnalisisIa.Error("La IA está ocupada"), estado.analisis)
+    }
+
+    @Test
+    fun analizarConIa_sinRepositorio_noHaceNada() = runTest {
+        observar()
+
+        viewModel.analizarConIa()
+
+        assertEquals(EstadoAnalisisIa.Inactivo, estado.analisis)
+    }
+
+    @Test
+    fun puedeAnalizar_soloSupervisorOAnalistaConFoto() = runTest {
+        observar()
+        assertTrue(estado.puedeAnalizar)
+
+        sesion.value = Usuario(id = 3, usuario = "analista", clave = "1234", nombreVisible = "Analista", rol = Rol.ANALISTA)
+        assertTrue(estado.puedeAnalizar)
+
+        sesion.value = Datos.operador
+        assertFalse(estado.puedeAnalizar)
+
+        sesion.value = Datos.supervisor
+        muestra.value = Datos.detalle().copy(fotoUri = null)
+        assertFalse(estado.puedeAnalizar)
     }
 }
