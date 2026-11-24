@@ -3,6 +3,7 @@ package com.acuimuestra.app.ui.screens
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,6 +61,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,105 +88,110 @@ fun HistorialScreen(
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val sincronizacion by viewModel.sincronizacion.collectAsStateWithLifecycle()
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-                .background(Brush.verticalGradient(listOf(AzulProfundo, AzulPrincipal)))
-                .statusBarsPadding()
-                .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 20.dp)
-        ) {
-            TextButton(
-                onClick = onVolver,
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier.offset(x = (-4).dp)
+    LazyColumn(
+        contentPadding = PaddingValues(bottom = 24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .navigationBarsPadding()
+    ) {
+        item(key = "encabezado") {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                    .background(Brush.verticalGradient(listOf(AzulProfundo, AzulPrincipal)))
+                    .statusBarsPadding()
+                    .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 20.dp)
             ) {
-                EtiquetaVolver("Inicio", Color.White, FontWeight.SemiBold)
-            }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "Historial de muestras",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Text(
-                        "${estado.muestras.size} resultado(s)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                }
-                TextButton(onClick = onDashboard, enabled = estado.todas.isNotEmpty()) {
-                    Icon(Icons.Outlined.BarChart, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Panel", color = Color.White, fontWeight = FontWeight.SemiBold)
-                }
-                OutlinedButton(
-                    onClick = onExportar,
-                    enabled = estado.todas.isNotEmpty(),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        Color.White.copy(alpha = 0.7f)
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                TextButton(
+                    onClick = onVolver,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.offset(x = (-4).dp)
                 ) {
-                    Text("Exportar")
+                    EtiquetaVolver("Inicio", Color.White, FontWeight.SemiBold)
                 }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "Historial",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            "${estado.muestras.size} resultado(s)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                    TextButton(onClick = onDashboard, enabled = estado.todas.isNotEmpty()) {
+                        Icon(Icons.Outlined.BarChart, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Panel", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    }
+                    OutlinedButton(
+                        onClick = onExportar,
+                        enabled = estado.todas.isNotEmpty(),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) {
+                        Text("Exportar")
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                BarraSincronizacion(sincronizacion, onSincronizar = viewModel::sincronizar)
+                Spacer(Modifier.height(12.dp))
+                TextField(
+                    value = estado.busqueda,
+                    onValueChange = viewModel::onBusquedaChange,
+                    placeholder = { Text("Buscar por centro, línea, operador o N°", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                    trailingIcon = if (estado.busqueda.isNotEmpty()) {
+                        { TextButton(onClick = { viewModel.onBusquedaChange("") }) { Text("Limpiar") } }
+                    } else null,
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-            Spacer(Modifier.height(16.dp))
-            TextField(
-                value = estado.busqueda,
-                onValueChange = viewModel::onBusquedaChange,
-                placeholder = { Text("Buscar por centro, línea, operador o N°") },
-                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                trailingIcon = if (estado.busqueda.isNotEmpty()) {
-                    { TextButton(onClick = { viewModel.onBusquedaChange("") }) { Text("Limpiar") } }
-                } else null,
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
         }
 
-        Spacer(Modifier.height(12.dp))
-        BarraSincronizacion(sincronizacion, onSincronizar = viewModel::sincronizar)
-        FilaFiltros(
-            opciones = listOf<Pair<Long?, String>>(null to "Todos los centros") + estado.centros.map { it.id to it.nombre },
-            seleccionado = estado.filtro.centroId,
-            onSeleccionar = viewModel::filtrarCentro
-        )
-        FilaFiltros(
-            opciones = listOf<Pair<EstadoRevision?, String>>(null to "Todos los estados") +
-                    EstadoRevision.entries.map { it to it.etiqueta() },
-            seleccionado = estado.filtro.estado,
-            onSeleccionar = viewModel::filtrarEstado
-        )
+        item(key = "filtros") {
+            Column(Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                FilaFiltros(
+                    opciones = listOf<Pair<Long?, String>>(null to "Todos los centros") + estado.centros.map { it.id to it.nombre },
+                    seleccionado = estado.filtro.centroId,
+                    onSeleccionar = viewModel::filtrarCentro
+                )
+                FilaFiltros(
+                    opciones = listOf<Pair<EstadoRevision?, String>>(null to "Todos los estados") +
+                            EstadoRevision.entries.map { it to it.etiqueta() },
+                    seleccionado = estado.filtro.estado,
+                    onSeleccionar = viewModel::filtrarEstado
+                )
+            }
+        }
 
         when {
-            estado.cargando -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+            estado.cargando -> item(key = "cargando") {
+                Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
 
-            estado.muestras.isEmpty() -> SinResultados()
-            else -> LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 24.dp,
-                    end = 24.dp,
-                    top = 12.dp,
-                    bottom = 24.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.navigationBarsPadding()
-            ) {
-                items(estado.muestras, key = { it.id }) { muestra ->
+            estado.muestras.isEmpty() -> item(key = "vacio") { SinResultados() }
+
+            else -> items(estado.muestras, key = { it.id }) { muestra ->
+                Box(Modifier.padding(horizontal = 24.dp, vertical = 6.dp)) {
                     TarjetaMuestra(muestra, onClick = { onVerDetalle(muestra.id) })
                 }
             }
@@ -258,7 +265,7 @@ private fun IndicadorMas(icono: ImageVector, degradado: Brush, alineacion: Align
 @Composable
 private fun SinResultados() {
     Column(
-        Modifier.fillMaxSize().padding(32.dp),
+        Modifier.fillMaxWidth().padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -335,32 +342,44 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
 
 @Composable
 private fun BarraSincronizacion(estado: EstadoSincronizacion, onSincronizar: () -> Unit) {
-    val (fondo, texto) = when {
-        !estado.enLinea -> MaterialTheme.colorScheme.tertiaryContainer to "Modo sin conexión · ${estado.pendientes} pendiente(s). Se enviarán al volver internet."
-        estado.sincronizando -> MaterialTheme.colorScheme.primaryContainer to "Sincronizando con el servidor…"
-        estado.pendientes > 0 -> MaterialTheme.colorScheme.tertiaryContainer to "${estado.pendientes} muestra(s) pendiente(s) de sincronización"
-        else -> MaterialTheme.colorScheme.secondaryContainer to "Todo sincronizado con el servidor"
+    val (icono, texto) = when {
+        !estado.enLinea -> Icons.Outlined.CloudOff to "Sin conexión · ${estado.pendientes} pendiente(s)"
+        estado.sincronizando -> null to "Sincronizando…"
+        estado.pendientes > 0 -> Icons.Outlined.Sync to "${estado.pendientes} pendiente(s) de envío"
+        else -> Icons.Outlined.CheckCircle to "Todo sincronizado"
     }
-    Surface(
-        color = fondo,
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White.copy(alpha = 0.14f))
+            .padding(start = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+        if (icono == null) {
+            CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+        } else {
+            Icon(icono, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            texto,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        TextButton(
+            onClick = onSincronizar,
+            enabled = estado.enLinea && !estado.sincronizando,
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = Color.White,
+                disabledContentColor = Color.White.copy(alpha = 0.5f)
+            )
         ) {
-            if (estado.sincronizando) {
-                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(10.dp))
-            } else if (estado.enLinea && estado.pendientes == 0) {
-                Icon(Icons.Outlined.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(10.dp))
-            }
-            Text(texto, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
-            TextButton(onClick = onSincronizar, enabled = estado.enLinea && !estado.sincronizando) {
-                Text("Sincronizar")
-            }
+            Text("Sincronizar", fontWeight = FontWeight.SemiBold)
         }
     }
 }
