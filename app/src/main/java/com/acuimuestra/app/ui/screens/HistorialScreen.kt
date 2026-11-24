@@ -68,6 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraResumen
+import com.acuimuestra.app.data.model.codigoMuestra
 import com.acuimuestra.app.ui.comoFechaHora
 import com.acuimuestra.app.ui.densidadTexto
 import com.acuimuestra.app.ui.etiqueta
@@ -147,7 +148,7 @@ fun HistorialScreen(
                 TextField(
                     value = estado.busqueda,
                     onValueChange = viewModel::onBusquedaChange,
-                    placeholder = { Text("Buscar por centro, línea, operador o N°", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    placeholder = { Text("Buscar por centro, línea, operador o código", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = if (estado.busqueda.isNotEmpty()) {
                         { TextButton(onClick = { viewModel.onBusquedaChange("") }) { Text("Limpiar") } }
@@ -303,7 +304,7 @@ private fun TarjetaMuestra(muestra: MuestraResumen, onClick: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Muestra #${muestra.id}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("Muestra ${codigoMuestra(muestra.uuid)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     EtiquetaEstado(muestra.estado)
                 }
                 Text("${muestra.centroNombre} · ${muestra.trenNombre} · ${muestra.lineaNombre}", style = MaterialTheme.typography.bodyMedium)

@@ -9,6 +9,7 @@ import android.graphics.pdf.PdfDocument
 import android.text.TextPaint
 import android.text.TextUtils
 import androidx.core.content.FileProvider
+import com.acuimuestra.app.data.model.codigoMuestra
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraResumen
 import java.io.File
@@ -35,9 +36,9 @@ object ExportadorPdf {
     private val BLANCO = 0xFFFFFFFF.toInt()
 
     private val columnas = listOf(
-        "N°" to 25f,
+        "Código" to 45f,
         "Fecha y hora" to 82f,
-        "Centro" to 110f,
+        "Centro" to 90f,
         "Tren" to 45f,
         "Línea" to 50f,
         "Tramo" to 40f,
@@ -86,7 +87,7 @@ object ExportadorPdf {
                 dibujarFila(
                     lienzo,
                     listOf(
-                        "#${m.id}", m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre, m.lineaNombre,
+                        codigoMuestra(m.uuid), m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre, m.lineaNombre,
                         "${m.tramoCm} cm", "${m.conteo}", densidadTexto(m.conteo, m.tramoCm), m.estado.etiqueta()
                     ),
                     y, texto
