@@ -132,7 +132,7 @@ fun ConteoScreen(
             CampoNumero(
                 valor = f.calibrePromedioMm,
                 onCambio = viewModel::onCalibreChange,
-                etiqueta = "Calibre (mm)",
+                etiqueta = "Calibre promedio (mm)",
                 error = f.errores[CampoRegistro.CALIBRE],
                 decimal = true,
                 modifier = Modifier.weight(1f)
@@ -140,7 +140,7 @@ fun ConteoScreen(
             CampoNumero(
                 valor = f.pesoGramos,
                 onCambio = viewModel::onPesoChange,
-                etiqueta = "Peso (g)",
+                etiqueta = "Peso total (g)",
                 error = f.errores[CampoRegistro.PESO],
                 decimal = true,
                 modifier = Modifier.weight(1f)
