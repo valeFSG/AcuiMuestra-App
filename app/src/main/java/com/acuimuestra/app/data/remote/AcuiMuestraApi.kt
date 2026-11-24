@@ -50,7 +50,21 @@ interface AcuiMuestraApi {
 
     @GET("api/muestras/{id}/foto")
     suspend fun descargarFoto(@Header(USUARIO) usuario: String, @Path("id") id: String): ResponseBody
+
+    @POST("api/muestras/{id}/analisis-ia")
+    suspend fun analizarConIa(@Header(USUARIO) usuario: String, @Path("id") id: String): AnalisisIa
 }
+
+data class AnalisisIa(
+    val conteoEstimado: Int,
+    val hayCholgas: Boolean,
+    val calidadFoto: String,
+    val comentario: String,
+    val conteoOperador: Int,
+    val diferenciaPorcentaje: Double?,
+    val requiereRevision: Boolean,
+    val modelo: String
+)
 
 data class MuestraEnvio(
     val id: String,
@@ -95,7 +109,7 @@ object ApiCliente {
         val registro = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
         val http = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
             .addInterceptor { cadena ->
                 val peticion = cadena.request()
                 cadena.proceed(

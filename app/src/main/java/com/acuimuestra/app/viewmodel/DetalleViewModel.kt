@@ -7,6 +7,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraDetalle
 import com.acuimuestra.app.data.model.Rol
+import com.acuimuestra.app.data.remote.AnalisisIa
+import com.acuimuestra.app.data.repository.AnalisisIaRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
 import com.acuimuestra.app.data.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +33,13 @@ data class FormularioCorreccion(
     val errorPeso: String? = null
 )
 
+sealed interface EstadoAnalisisIa {
+    data object Inactivo : EstadoAnalisisIa
+    data object Cargando : EstadoAnalisisIa
+    data class Listo(val resultado: AnalisisIa) : EstadoAnalisisIa
+    data class Error(val mensaje: String) : EstadoAnalisisIa
+}
+
 data class DetalleUiState(
     val cargando: Boolean = true,
     val muestra: MuestraDetalle? = null,
@@ -38,13 +47,15 @@ data class DetalleUiState(
     val comentario: String = "",
     val errorComentario: String? = null,
     val mensaje: String? = null,
-    val correccion: FormularioCorreccion? = null
+    val correccion: FormularioCorreccion? = null,
+    val analisis: EstadoAnalisisIa = EstadoAnalisisIa.Inactivo
 ) {
     private val enRevision: Boolean
         get() = muestra?.estado == EstadoRevision.PENDIENTE || muestra?.estado == EstadoRevision.CORREGIDO
 
     val puedeRevisar: Boolean get() = rol == Rol.SUPERVISOR && enRevision
     val puedeCorregir: Boolean get() = rol == Rol.OPERADOR && muestra?.estado == EstadoRevision.OBSERVADO
+    val puedeAnalizar: Boolean get() = (rol == Rol.SUPERVISOR || rol == Rol.ANALISTA) && muestra?.fotoUri != null
 }
 
 private data class FormularioRevision(
@@ -56,18 +67,21 @@ private data class FormularioRevision(
 class DetalleViewModel(
     private val muestraId: Long,
     private val muestraRepository: MuestraRepository,
-    usuarioRepository: UsuarioRepository
+    usuarioRepository: UsuarioRepository,
+    private val analisisIaRepository: AnalisisIaRepository? = null
 ) : ViewModel() {
 
     private val formulario = MutableStateFlow(FormularioRevision())
     private val correccion = MutableStateFlow<FormularioCorreccion?>(null)
+    private val analisis = MutableStateFlow<EstadoAnalisisIa>(EstadoAnalisisIa.Inactivo)
 
     val estado: StateFlow<DetalleUiState> = combine(
         muestraRepository.detalle(muestraId),
         usuarioRepository.usuarioActual,
         formulario,
-        correccion
-    ) { muestra, usuario, form, corr ->
+        correccion,
+        analisis
+    ) { muestra, usuario, form, corr, ia ->
         DetalleUiState(
             cargando = false,
             muestra = muestra,
@@ -75,7 +89,8 @@ class DetalleViewModel(
             comentario = form.comentario,
             errorComentario = form.errorComentario,
             mensaje = form.mensaje,
-            correccion = corr
+            correccion = corr,
+            analisis = ia
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DetalleUiState())
 
@@ -111,6 +126,19 @@ class DetalleViewModel(
     fun descartar() {
         if (!comentarioEsValido()) return
         cambiarEstado(EstadoRevision.DESCARTADO, formulario.value.comentario.trim(), "Muestra descartada")
+    }
+
+    fun analizarConIa() {
+        val uuid = estado.value.muestra?.uuid ?: return
+        val repositorio = analisisIaRepository ?: return
+        if (analisis.value == EstadoAnalisisIa.Cargando) return
+        analisis.value = EstadoAnalisisIa.Cargando
+        viewModelScope.launch {
+            analisis.value = repositorio.analizar(uuid).fold(
+                onSuccess = { EstadoAnalisisIa.Listo(it) },
+                onFailure = { EstadoAnalisisIa.Error(it.message ?: "No se pudo analizar la foto.") }
+            )
+        }
     }
 
     fun iniciarCorreccion() {
@@ -218,7 +246,12 @@ class DetalleViewModel(
         fun factory(muestraId: Long) = viewModelFactory {
             initializer {
                 val contenedor = contenedor()
-                DetalleViewModel(muestraId, contenedor.muestraRepository, contenedor.usuarioRepository)
+                DetalleViewModel(
+                    muestraId,
+                    contenedor.muestraRepository,
+                    contenedor.usuarioRepository,
+                    contenedor.analisisIaRepository
+                )
             }
         }
     }

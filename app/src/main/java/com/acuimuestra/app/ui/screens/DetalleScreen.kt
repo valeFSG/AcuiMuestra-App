@@ -31,6 +31,10 @@ import com.acuimuestra.app.ui.components.FotoMuestra
 import com.acuimuestra.app.ui.theme.AzulPrincipal
 import com.acuimuestra.app.ui.theme.AzulProfundo
 import com.acuimuestra.app.viewmodel.DetalleUiState
+import com.acuimuestra.app.viewmodel.EstadoAnalisisIa
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
+import java.util.Locale
 import com.acuimuestra.app.viewmodel.DetalleViewModel
 import com.acuimuestra.app.viewmodel.FormularioCorreccion
 import androidx.compose.ui.platform.LocalContext
@@ -102,6 +106,9 @@ fun DetalleScreen(
                             color = if (muestra.observaciones.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
                             else MaterialTheme.colorScheme.onSurface
                         )
+                    }
+                    if (estado.puedeAnalizar) {
+                        TarjetaAnalisisIa(estado.analisis, onAnalizar = viewModel::analizarConIa)
                     }
                     val context = LocalContext.current
                     OutlinedButton(
@@ -226,6 +233,75 @@ private fun Metrica(
                         modifier = Modifier.padding(bottom = 3.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaAnalisisIa(estado: EstadoAnalisisIa, onAnalizar: () -> Unit) {
+    Seccion("Análisis con IA") {
+        when (estado) {
+            EstadoAnalisisIa.Inactivo -> {
+                Text(
+                    "Segunda opinión sobre la foto: individuos estimados, presencia de cholgas y calidad de la imagen.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Button(
+                    onClick = onAnalizar,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) {
+                    Icon(Icons.Outlined.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Analizar con IA", fontWeight = FontWeight.SemiBold)
+                }
+            }
+
+            EstadoAnalisisIa.Cargando -> Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(12.dp))
+                Text("Analizando la foto…", style = MaterialTheme.typography.bodyMedium)
+            }
+
+            is EstadoAnalisisIa.Listo -> {
+                val r = estado.resultado
+                Dato("Individuos estimados por la IA", r.conteoEstimado.toString())
+                Dato(
+                    "Conteo registrado",
+                    r.conteoOperador.toString() + (r.diferenciaPorcentaje?.let {
+                        " · diferencia " + String.format(Locale.forLanguageTag("es-CL"), "%.1f", it) + " %"
+                    } ?: "")
+                )
+                Dato("Cholgas", if (r.hayCholgas) "Se ven cholgas en la foto" else "No se ven cholgas")
+                Dato("Calidad de la foto", r.calidadFoto.replaceFirstChar { it.uppercase() })
+                if (r.comentario.isNotBlank()) Dato("Comentario", r.comentario)
+                Surface(
+                    color = if (r.requiereRevision) MaterialTheme.colorScheme.tertiaryContainer
+                    else MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (r.requiereRevision) "Conviene revisar: la IA ve diferencias, cholgas o una foto poco clara"
+                        else "Coincide con el registro del operador",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                Text(
+                    "Estimación de ${r.modelo}. Es una segunda opinión: no reemplaza el conteo del operador.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextButton(onClick = onAnalizar) { Text("Analizar de nuevo") }
+            }
+
+            is EstadoAnalisisIa.Error -> {
+                Text(estado.mensaje, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                OutlinedButton(onClick = onAnalizar, modifier = Modifier.fillMaxWidth()) { Text("Reintentar") }
             }
         }
     }

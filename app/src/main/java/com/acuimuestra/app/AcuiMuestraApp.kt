@@ -12,6 +12,7 @@ import com.acuimuestra.app.data.remote.ApiCliente
 import com.acuimuestra.app.data.remote.MarinaCliente
 import com.acuimuestra.app.data.remote.RedMonitor
 import com.acuimuestra.app.data.remote.RelojRed
+import com.acuimuestra.app.data.repository.AnalisisIaRepository
 import com.acuimuestra.app.data.repository.CatalogoRepository
 import com.acuimuestra.app.data.repository.MarinaRepository
 import com.acuimuestra.app.data.repository.MuestraRepository
@@ -31,6 +32,7 @@ class AppContainer(app: Application, db: AcuiMuestraDatabase) {
     val usuarioRepository = UsuarioRepository(db.usuarioDao())
     val catalogoRepository = CatalogoRepository(db.catalogoDao())
     val sincronizador = Sincronizador(app, RedMonitor(app))
+    private val api = ApiCliente.crear()
     val muestraRepository = MuestraRepository(
         dao = db.muestraDao(),
         usuarioActual = { usuarioRepository.usuarioActual.value?.usuario },
@@ -39,10 +41,11 @@ class AppContainer(app: Application, db: AcuiMuestraDatabase) {
     val sincronizacionRepository = SincronizacionRepository(
         muestraDao = db.muestraDao(),
         usuarioDao = db.usuarioDao(),
-        api = ApiCliente.crear(),
+        api = api,
         fotos = AlmacenFotosAndroid(app),
         usuarioConsulta = { usuarioRepository.usuarioActual.value?.usuario ?: "operador" }
     )
+    val analisisIaRepository = AnalisisIaRepository(api) { usuarioRepository.usuarioActual.value?.usuario }
     val relojRed = RelojRed()
     val marinaRepository = MarinaRepository(MarinaCliente.crear())
 }
