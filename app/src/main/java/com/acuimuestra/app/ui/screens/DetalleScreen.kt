@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraDetalle
+import com.acuimuestra.app.data.model.codigoMuestra
 import com.acuimuestra.app.ui.comoFechaHora
 import com.acuimuestra.app.ui.densidadTexto
 import com.acuimuestra.app.ui.components.FotoMuestra
@@ -167,7 +168,7 @@ private fun Encabezado(muestra: MuestraDetalle, onVolver: () -> Unit) {
             EtiquetaEstado(muestra.estado)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Muestra #${muestra.id}",
+                "Muestra ${codigoMuestra(muestra.uuid)}",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White

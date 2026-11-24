@@ -1,5 +1,6 @@
 package com.acuimuestra.app.ui.screens
 
+import com.acuimuestra.app.data.model.codigoMuestra
 import com.acuimuestra.app.ui.components.EtiquetaVolver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -127,7 +128,7 @@ fun ExportarScreen(
         Surface(shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surfaceContainerLowest) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(20.dp)) {
                 Text(
-                    "Columnas: id, fecha, centro, tren, línea, operador, conteo, tramo, densidad, estado",
+                    "Columnas: código, fecha, centro, tren, línea, operador, conteo, tramo, densidad, estado",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -203,7 +204,7 @@ private fun FilaSeleccion(muestra: MuestraResumen, marcada: Boolean, onAlternar:
         Row(Modifier.padding(horizontal = 8.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = marcada, onCheckedChange = { onAlternar() })
             Column(Modifier.weight(1f)) {
-                Text("Muestra #${muestra.id} · ${muestra.conteo} ind.", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text("Muestra ${codigoMuestra(muestra.uuid)} · ${muestra.conteo} ind.", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 Text("${muestra.centroNombre} · ${muestra.trenNombre} · ${muestra.lineaNombre}", style = MaterialTheme.typography.bodySmall)
                 Text(muestra.fechaHora.comoFechaHora(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

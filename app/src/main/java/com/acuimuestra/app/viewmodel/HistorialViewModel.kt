@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.acuimuestra.app.data.model.codigoMuestra
 import com.acuimuestra.app.data.model.Centro
 import com.acuimuestra.app.data.model.EstadoRevision
 import com.acuimuestra.app.data.model.MuestraResumen
@@ -78,7 +79,7 @@ class HistorialViewModel(
         val t = texto.trim()
         if (t.isEmpty()) return muestras
         return muestras.filter { m ->
-            listOf("#${m.id}", m.centroNombre, m.trenNombre, m.lineaNombre, m.operadorNombre, m.conteo.toString())
+            listOf("#${m.id}", codigoMuestra(m.uuid), m.uuid, m.centroNombre, m.trenNombre, m.lineaNombre, m.operadorNombre, m.conteo.toString())
                 .any { it.contains(t, ignoreCase = true) }
         }
     }

@@ -55,7 +55,7 @@ interface MuestraDao {
 
     @Query(
         """
-        SELECT m.id, m.fechaHora, m.conteo, m.estado, m.sincronizada, m.tramoCm, m.observaciones,
+        SELECT m.id, m.uuid, m.fechaHora, m.conteo, m.estado, m.sincronizada, m.tramoCm, m.observaciones,
                c.nombre AS centroNombre, t.nombre AS trenNombre,
                l.nombre AS lineaNombre, u.nombreVisible AS operadorNombre
         FROM muestras m

@@ -5,16 +5,17 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import com.acuimuestra.app.data.model.MuestraDetalle
 import com.acuimuestra.app.data.model.MuestraResumen
+import com.acuimuestra.app.data.model.codigoMuestra
 import java.io.File
 
 object ExportadorCsv {
-    private val encabezado = listOf("id", "fecha_hora", "centro", "tren", "linea", "operador", "conteo", "tramo_cm", "densidad_ind_m", "estado")
+    private val encabezado = listOf("codigo", "fecha_hora", "centro", "tren", "linea", "operador", "conteo", "tramo_cm", "densidad_ind_m", "estado")
 
     fun generar(muestras: List<MuestraResumen>): String = buildString {
         appendLine(encabezado.joinToString(";"))
         muestras.forEach { m ->
             val fila = listOf(
-                m.id, m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre,
+                codigoMuestra(m.uuid), m.fechaHora.comoFechaHora(), m.centroNombre, m.trenNombre,
                 m.lineaNombre, m.operadorNombre, m.conteo, m.tramoCm,
                 densidadTexto(m.conteo, m.tramoCm).removeSuffix(" ind/m"), m.estado.etiqueta()
             )
@@ -27,7 +28,7 @@ object ExportadorCsv {
 }
 
 fun MuestraDetalle.resumenTexto(): String = buildString {
-    appendLine("AcuiMuestra – Muestra #$id (${estado.etiqueta()})")
+    appendLine("AcuiMuestra – Muestra ${codigoMuestra(uuid)} (${estado.etiqueta()})")
     appendLine("Centro: $centroNombre")
     appendLine("Tren / Línea: $trenNombre · $lineaNombre")
     appendLine("Fecha y hora: ${fechaHora.comoFechaHora()}")
