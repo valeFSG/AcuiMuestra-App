@@ -24,7 +24,7 @@ class LoginScreenTest {
 
     @get:Rule val compose = createComposeRule()
 
-    private val operador = Usuario(1, "operador", "1234", "Operador", Rol.OPERADOR)
+    private val operador = Usuario(1, "operador", "1234", "Camila Rojas", Rol.OPERADOR)
 
     private val daoFalso = object : UsuarioDao {
         override suspend fun autenticar(usuario: String, clave: String) =
@@ -44,9 +44,20 @@ class LoginScreenTest {
     }
 
     @Test
-    fun formularioVacio_muestraMensajeDeError() {
+    fun muestraLosCuatroPerfiles() {
         mostrarLogin()
 
+        compose.onNodeWithText("Camila Rojas").assertIsDisplayed()
+        compose.onNodeWithText("Diego Muñoz").assertIsDisplayed()
+        compose.onNodeWithText("Andrea Soto").assertIsDisplayed()
+        compose.onNodeWithText("Felipe Vargas").assertIsDisplayed()
+    }
+
+    @Test
+    fun claveVacia_muestraMensajeDeError() {
+        mostrarLogin()
+
+        compose.onNodeWithText("Camila Rojas").performClick()
         compose.onNodeWithText("Ingresar").performClick()
 
         compose.onNodeWithText("Ingresa usuario y contraseña").assertIsDisplayed()
@@ -56,7 +67,7 @@ class LoginScreenTest {
     fun claveIncorrecta_muestraMensajeDeError() {
         mostrarLogin()
 
-        compose.onNode(hasSetTextAction() and hasText("Usuario")).performTextInput("operador")
+        compose.onNodeWithText("Camila Rojas").performClick()
         compose.onNode(hasSetTextAction() and hasText("Contraseña")).performTextInput("9999")
         compose.onNodeWithText("Ingresar").performClick()
 
@@ -68,10 +79,20 @@ class LoginScreenTest {
         var ingreso = false
         mostrarLogin { ingreso = true }
 
-        compose.onNode(hasSetTextAction() and hasText("Usuario")).performTextInput("operador")
+        compose.onNodeWithText("Camila Rojas").performClick()
         compose.onNode(hasSetTextAction() and hasText("Contraseña")).performTextInput("1234")
         compose.onNodeWithText("Ingresar").performClick()
 
         compose.waitUntil(timeoutMillis = 3_000) { ingreso }
+    }
+
+    @Test
+    fun cambiarPerfil_vuelveALaLista() {
+        mostrarLogin()
+
+        compose.onNodeWithText("Camila Rojas").performClick()
+        compose.onNodeWithText("Cambiar perfil").performClick()
+
+        compose.onNodeWithText("Felipe Vargas").assertIsDisplayed()
     }
 }
